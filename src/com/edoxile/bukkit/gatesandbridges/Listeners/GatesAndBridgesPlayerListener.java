@@ -41,12 +41,12 @@ public class GatesAndBridgesPlayerListener extends PlayerListener {
                         if (!gate.isValidGate())
                             return;
                         gate.toggleGate();
-                    }/* else if (sign.getMechanicsType() == MechanicsType.BRIDGE) {
+                    }else if (sign.getMechanicsType() == MechanicsType.BRIDGE) {
                         Bridge bridge = sign.bridgeFactory();
-                        if (!bridge.isValidGate())
+                        if (!bridge.isValidBridge())
                             return;
                         bridge.toggleBridge();
-                    }*/ else {
+                    } else {
                         return;
                     }
                 }

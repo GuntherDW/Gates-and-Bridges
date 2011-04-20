@@ -71,6 +71,7 @@ public class GateMapper {
         if (startBlock == null) {
             return false;
         } else {
+            fenceSet.clear();
             fenceSet.add(startBlock);
             listFences(startBlock);
             return true;

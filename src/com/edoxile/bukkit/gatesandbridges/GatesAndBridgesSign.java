@@ -23,14 +23,14 @@ public class GatesAndBridgesSign {
 
     private boolean isBridgeOrGateSign() {
         String line = sign.getLine(1);
-        return (line.equals("[Gate]") || line.equals("[Bridge]") || line.equals("[Bridge End]"));
+        return (line.equals("[Gate]") || line.equals("[Bridge]"));
     }
 
     public MechanicsType getMechanicsType() {
         String line = sign.getLine(1);
         if (line.equals("[Gate]")) {
             return MechanicsType.GATE;
-        } else if (line.equals("[Bridge]") || line.equals("[Bridge End]")) {
+        } else if (line.equals("[Bridge]")) {
             return MechanicsType.BRIDGE;
         } else {
             return null;
@@ -51,7 +51,7 @@ public class GatesAndBridgesSign {
             return null;
     }
 
-    private BlockFace getSignBack() {
+    public BlockFace getSignBack() {
         if (sign.getType() == Material.WALL_SIGN) {
             switch (sign.getData().getData()) {
                 case 0x2:
@@ -83,7 +83,7 @@ public class GatesAndBridgesSign {
         }
     }
 
-    private BlockFace getSignFront() {
+    public BlockFace getSignFront() {
         if (sign.getType() == Material.WALL_SIGN) {
             switch (sign.getData().getData()) {
                 case 0x2:

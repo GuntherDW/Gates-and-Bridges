@@ -1,11 +1,114 @@
 package com.edoxile.bukkit.gatesandbridges.Mappers;
 
+import com.edoxile.bukkit.gatesandbridges.Listeners.GatesAndBridgesPlayerListener;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Sign;
+
+import java.util.HashSet;
+
 /**
  * Created by IntelliJ IDEA.
  * User: Edoxile
- * Date: 19-4-11
- * Time: 8:50
- * To change this template use File | Settings | File Templates.
  */
 public class BridgeMapper {
+    private Block startBlock = null;
+    private Block endBlock = null;
+    private HashSet<Block> bridgeSet = new HashSet<Block>();
+
+    public boolean mapBridge(Block block, BlockFace blockFace) {
+        startBlock = block;
+        endBlock = getEndBlock(block, blockFace);
+        if (endBlock == null) {
+            return false;
+        } else {
+            bridgeSet.add(startBlock);
+            listBlocks(startBlock, endBlock, blockFace);
+            return true;
+        }
+    }
+
+    public Block getEndBlock(Block block, BlockFace blockFace) {
+        int d = 0;
+        Block tempBlock = block;
+        do {
+            tempBlock = tempBlock.getRelative(blockFace);
+            if (tempBlock.getType() == Material.SIGN_POST || tempBlock.getType() == Material.WALL_SIGN) {
+                BlockState state = tempBlock.getState();
+                if (state instanceof Sign) {
+                    Sign s = (Sign) state;
+                    if (s.getLine(1).equals("[Bridge]") || s.getLine(1).equals("[Bridge End]")) {
+                        return tempBlock;
+                    } else {
+                        continue;
+                    }
+                }
+            } else {
+                d++;
+            }
+        } while (d <= 30);
+        GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "Couldn't find [Bridge] or [Bridge End].");
+        return null;
+    }
+
+    public void listBlocks(Block s, Block e, BlockFace d) {
+        bridgeSet.clear();
+        int dy = 0;
+        if (s.getRelative(BlockFace.UP).getTypeId() == 5) {
+            dy = 1;
+        } else if (s.getRelative(BlockFace.DOWN).getType() == Material.WOOD) {
+            dy = -1;
+        } else {
+            GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "Bridges need to be made of wood!");
+            return;
+        }
+
+        Block tempBlock = s;
+        switch (d) {
+            case WEST: {
+                for (int dz = s.getLocation().getBlockZ()+1; dz < e.getLocation().getBlockZ(); dz++) {
+                    for (int dx = -1; dx <= 1; dx++) {
+                        bridgeSet.add(tempBlock.getRelative(dx, dy, dz));
+                    }
+                }
+            }
+            case EAST: {
+                for (int dz = s.getLocation().getBlockZ()-1; dz > e.getLocation().getBlockZ(); dz--) {
+                    for (int dx = -1; dx <= 1; dx++) {
+                        bridgeSet.add(tempBlock.getRelative(dx, dy, dz));
+                    }
+                }
+            }
+            break;
+            case NORTH: {
+                for (int dx = s.getLocation().getBlockZ()-1; dx > e.getLocation().getBlockZ(); dx--) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        bridgeSet.add(tempBlock.getRelative(dx, dy, dz));
+                    }
+                }
+            }
+            case SOUTH: {
+                for (int dx = s.getLocation().getBlockZ()+1; dx < e.getLocation().getBlockZ(); dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        bridgeSet.add(tempBlock.getRelative(dx, dy, dz));
+                    }
+                }
+            }
+            break;
+        }
+    }
+
+    public boolean isClosed(){
+        for(Block b : bridgeSet){
+            return b.getType() == Material.WOOD;
+        }
+        return false;
+    }
+
+    public HashSet<Block> getSet(){
+        return bridgeSet;
+    }
 }
