@@ -108,6 +108,7 @@ public class BridgeMapper {
     }
 
     public boolean isClosed() {
+        dumpSet();
         for (Block b : bridgeSet) {
             return b.getType() == Material.WOOD;
         }
