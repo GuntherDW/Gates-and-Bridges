@@ -9,6 +9,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 
 import java.util.HashSet;
+import java.util.logging.Logger;
 
 /**
  * Created by IntelliJ IDEA.
@@ -18,6 +19,7 @@ public class BridgeMapper {
     private Block startBlock = null;
     private Block endBlock = null;
     private HashSet<Block> bridgeSet = new HashSet<Block>();
+    private final static Logger log = Logger.getLogger("Minecraft");
 
     public boolean mapBridge(Block block, BlockFace blockFace) {
         startBlock = block;
@@ -25,7 +27,6 @@ public class BridgeMapper {
         if (endBlock == null) {
             return false;
         } else {
-            bridgeSet.add(startBlock);
             listBlocks(startBlock, endBlock, blockFace);
             return true;
         }
@@ -57,7 +58,7 @@ public class BridgeMapper {
     public void listBlocks(Block s, Block e, BlockFace d) {
         bridgeSet.clear();
         int dy = 0;
-        if (s.getRelative(BlockFace.UP).getTypeId() == 5) {
+        if (s.getRelative(BlockFace.UP).getType() == Material.WOOD) {
             dy = 1;
         } else if (s.getRelative(BlockFace.DOWN).getType() == Material.WOOD) {
             dy = -1;
@@ -66,49 +67,60 @@ public class BridgeMapper {
             return;
         }
 
-        Block tempBlock = s;
         switch (d) {
             case WEST: {
-                for (int dz = s.getLocation().getBlockZ()+1; dz < e.getLocation().getBlockZ(); dz++) {
+                for (int dz = s.getLocation().getBlockZ() + 1; dz < e.getLocation().getBlockZ(); dz++) {
                     for (int dx = -1; dx <= 1; dx++) {
-                        bridgeSet.add(tempBlock.getRelative(dx, dy, dz));
+                        bridgeSet.add(s.getRelative(dx, dy, dz));
                     }
                 }
             }
+            break;
             case EAST: {
-                for (int dz = s.getLocation().getBlockZ()-1; dz > e.getLocation().getBlockZ(); dz--) {
+                for (int dz = s.getLocation().getBlockZ() - 1; dz > e.getLocation().getBlockZ(); dz--) {
                     for (int dx = -1; dx <= 1; dx++) {
-                        bridgeSet.add(tempBlock.getRelative(dx, dy, dz));
+                        bridgeSet.add(s.getRelative(dx, dy, dz));
                     }
                 }
             }
             break;
             case NORTH: {
-                for (int dx = s.getLocation().getBlockZ()-1; dx > e.getLocation().getBlockZ(); dx--) {
+                for (int dx = s.getLocation().getBlockX() - 1; dx > e.getLocation().getBlockX(); dx--) {
                     for (int dz = -1; dz <= 1; dz++) {
-                        bridgeSet.add(tempBlock.getRelative(dx, dy, dz));
-                    }
-                }
-            }
-            case SOUTH: {
-                for (int dx = s.getLocation().getBlockZ()+1; dx < e.getLocation().getBlockZ(); dx++) {
-                    for (int dz = -1; dz <= 1; dz++) {
-                        bridgeSet.add(tempBlock.getRelative(dx, dy, dz));
+                        bridgeSet.add(s.getRelative(dx, dy, dz));
                     }
                 }
             }
             break;
+            case SOUTH: {
+                for (int dx = s.getLocation().getBlockX() + 1; dx < e.getLocation().getBlockX(); dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        bridgeSet.add(s.getRelative(dx, dy, dz));
+                    }
+                }
+            }
+            break;
+            default:
+                log.info("[BridgesAndGates] Not a valid BlockFace: " + d.name());
+                break;
         }
+        dumpSet();
     }
 
-    public boolean isClosed(){
-        for(Block b : bridgeSet){
+    public boolean isClosed() {
+        for (Block b : bridgeSet) {
             return b.getType() == Material.WOOD;
         }
+        log.info("[GatesAndBridges] blockSet empty!");
+        dumpSet();
         return false;
     }
 
-    public HashSet<Block> getSet(){
+    public HashSet<Block> getSet() {
         return bridgeSet;
+    }
+
+    public void dumpSet() {
+        log.info("[GatesAndBridges] dump: " + bridgeSet.toString());
     }
 }

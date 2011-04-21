@@ -38,30 +38,30 @@ public class Bridge {
     public boolean toggleBridge() {
         if (bridgeMapper.isClosed()) {
             //Open
-            int fences = 0;
+            int blocks = 0;
             for (Block b : bridgeMapper.getSet()) {
                 Block tempBlock = b;
                 tempBlock.setType(Material.AIR);
-                fences++;
+                blocks++;
             }
-            if (chestMapper.addMaterial(Material.WOOD, fences)) {
+            if (chestMapper.addMaterial(Material.WOOD, blocks)) {
                 GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.GREEN + "Bridge opened!");
             }
         } else {
             //Close
-            int fences = 0;
+            int blocks = 0;
             for (Block b : bridgeMapper.getSet()) {
                 Block tempBlock = b;
                 tempBlock.setType(Material.WOOD);
-                fences++;
+                blocks++;
             }
-            if (chestMapper.removeMaterial(Material.WOOD, fences)) {
+            if (chestMapper.removeMaterial(Material.WOOD, blocks)) {
                 GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.GREEN + "Bridge closed!");
             } else {
                 for (Block b : bridgeMapper.getSet()) {
                     Block tempBlock = b;
                     tempBlock.setType(Material.AIR);
-                    fences++;
+                    blocks++;
                 }
                 GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.YELLOW + "Bridge remains unchanged...");
             }
