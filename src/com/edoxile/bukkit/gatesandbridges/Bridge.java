@@ -29,7 +29,16 @@ public class Bridge {
 
     public boolean isValidBridge() {
         if (bridgeMapper.mapBridge(sign.getBlock(), sign.getSignBack())) {
-            return chestMapper.mapChest(sign.getBlock());
+            if (chestMapper.mapChest(bridgeMapper.getEndBlock(sign.getBlock(), sign.getSignBack()))) {
+                return true;
+            } else {
+                if (chestMapper.mapChest(sign.getBlock())) {
+                    return true;
+                } else {
+                    GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "No chest found close to sign.");
+                    return false;
+                }
+            }
         } else {
             return false;
         }

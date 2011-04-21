@@ -32,7 +32,12 @@ public class Gate {
             return false;
         } else {
             if (gateMapper.mapGate(sign.getBackBlock())) {
-                return chestMapper.mapChest(sign.getBlock());
+                if (chestMapper.mapChest(sign.getBlock())) {
+                    return true;
+                } else {
+                    GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "No chest found close to sign.");
+                    return false;
+                }
             } else {
                 return false;
             }

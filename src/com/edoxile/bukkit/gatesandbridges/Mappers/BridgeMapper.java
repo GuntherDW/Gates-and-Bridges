@@ -69,7 +69,7 @@ public class BridgeMapper {
 
         switch (d) {
             case WEST: {
-                for (int dz = s.getLocation().getBlockZ() + 1; dz < e.getLocation().getBlockZ(); dz++) {
+                for (int dz = 1; dz < e.getLocation().getBlockZ()-s.getLocation().getBlockZ(); dz++) {
                     for (int dx = -1; dx <= 1; dx++) {
                         bridgeSet.add(s.getRelative(dx, dy, dz));
                     }
@@ -77,7 +77,7 @@ public class BridgeMapper {
             }
             break;
             case EAST: {
-                for (int dz = s.getLocation().getBlockZ() - 1; dz > e.getLocation().getBlockZ(); dz--) {
+                for (int dz = -1; dz > e.getLocation().getBlockZ()-s.getLocation().getBlockZ(); dz--) {
                     for (int dx = -1; dx <= 1; dx++) {
                         bridgeSet.add(s.getRelative(dx, dy, dz));
                     }
@@ -85,7 +85,7 @@ public class BridgeMapper {
             }
             break;
             case NORTH: {
-                for (int dx = s.getLocation().getBlockX() - 1; dx > e.getLocation().getBlockX(); dx--) {
+                for (int dx = -1; dx > e.getLocation().getBlockX()-s.getLocation().getBlockX(); dx--) {
                     for (int dz = -1; dz <= 1; dz++) {
                         bridgeSet.add(s.getRelative(dx, dy, dz));
                     }
@@ -93,7 +93,7 @@ public class BridgeMapper {
             }
             break;
             case SOUTH: {
-                for (int dx = s.getLocation().getBlockX() + 1; dx < e.getLocation().getBlockX(); dx++) {
+                for (int dx = 1; dx < e.getLocation().getBlockX()-s.getLocation().getBlockX(); dx++) {
                     for (int dz = -1; dz <= 1; dz++) {
                         bridgeSet.add(s.getRelative(dx, dy, dz));
                     }
@@ -104,11 +104,9 @@ public class BridgeMapper {
                 log.info("[BridgesAndGates] Not a valid BlockFace: " + d.name());
                 break;
         }
-        dumpSet();
     }
 
     public boolean isClosed() {
-        dumpSet();
         for (Block b : bridgeSet) {
             return b.getType() == Material.WOOD;
         }

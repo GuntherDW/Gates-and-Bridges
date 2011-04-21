@@ -120,7 +120,7 @@ public class GatesAndBridgesSign {
     }
 
     public Block getBackBlock(){
-        if(getSignFront() == null){
+        if(getSignBack() == null){
             GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.YELLOW + "Sign is placed incorrect. Direction should be: North, East, South or West.");
         }
         return sign.getBlock().getRelative(getSignBack());

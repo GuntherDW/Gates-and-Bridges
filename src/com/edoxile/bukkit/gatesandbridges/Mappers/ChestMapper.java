@@ -42,7 +42,6 @@ public class ChestMapper {
                 }
             }
         }
-        GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "No chest found close to sign.");
         return false;
     }
 
