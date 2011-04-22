@@ -94,4 +94,56 @@ public class Gate {
         }
         return false;
     }
+
+    public boolean openGate() {
+        int fences = 0;
+        for (Block b : gateMapper.getSet()) {
+            Block tempBlock = b;
+            while (tempBlock.getRelative(BlockFace.DOWN).getType() == Material.FENCE) {
+                tempBlock = tempBlock.getRelative(BlockFace.DOWN);
+                tempBlock.setType(Material.AIR);
+                fences++;
+            }
+        }
+        if (chestMapper.addMaterial(Material.FENCE, fences)) {
+            return true;
+        } else {
+            for (Block b : gateMapper.getSet()) {
+                Block tempBlock = b;
+                while (tempBlock.getRelative(BlockFace.DOWN).getType() == Material.AIR) {
+                    tempBlock = tempBlock.getRelative(BlockFace.DOWN);
+                    tempBlock.setType(Material.FENCE);
+                }
+            }
+            return false;
+        }
+    }
+
+    public boolean closeGate() {
+        int fences = 0;
+        for (Block b : gateMapper.getSet()) {
+            Block tempBlock = b;
+            while (tempBlock.getRelative(BlockFace.DOWN).getType() == Material.AIR) {
+                tempBlock = tempBlock.getRelative(BlockFace.DOWN);
+                tempBlock.setType(Material.FENCE);
+                fences++;
+            }
+        }
+        if (chestMapper.removeMaterial(Material.FENCE, fences)) {
+            return true;
+        } else {
+            for (Block b : gateMapper.getSet()) {
+                Block tempBlock = b;
+                while (tempBlock.getRelative(BlockFace.DOWN).getType() == Material.FENCE) {
+                    tempBlock = tempBlock.getRelative(BlockFace.DOWN);
+                    tempBlock.setType(Material.AIR);
+                }
+            }
+            return false;
+        }
+    }
+
+    public boolean isClosed(){
+        return gateMapper.isClosed();
+    }
 }

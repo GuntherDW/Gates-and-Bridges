@@ -85,4 +85,44 @@ public class Bridge {
         }
         return false;
     }
+
+    public boolean openBridge() {
+        int blocks = 0;
+        for (Block b : bridgeMapper.getSet()) {
+            Block tempBlock = b;
+            tempBlock.setType(Material.AIR);
+            blocks++;
+        }
+        if (chestMapper.addMaterial(Material.WOOD, blocks)) {
+            return true;
+        } else {
+            for (Block b : bridgeMapper.getSet()) {
+                Block tempBlock = b;
+                tempBlock.setType(Material.WOOD);
+            }
+            return false;
+        }
+    }
+
+    public boolean closeBridge() {
+        int blocks = 0;
+        for (Block b : bridgeMapper.getSet()) {
+            Block tempBlock = b;
+            tempBlock.setType(Material.WOOD);
+            blocks++;
+        }
+        if (chestMapper.removeMaterial(Material.WOOD, blocks)) {
+            return true;
+        } else {
+            for (Block b : bridgeMapper.getSet()) {
+                Block tempBlock = b;
+                tempBlock.setType(Material.AIR);
+            }
+            return false;
+        }
+    }
+
+    public boolean isClosed(){
+        return bridgeMapper.isClosed();
+    }
 }

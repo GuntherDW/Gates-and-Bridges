@@ -115,15 +115,10 @@ public class BridgeMapper {
             return b.getType() == Material.WOOD;
         }
         log.info("[GatesAndBridges] blockSet empty!");
-        dumpSet();
         return false;
     }
 
     public HashSet<Block> getSet() {
         return bridgeSet;
-    }
-
-    public void dumpSet() {
-        log.info("[GatesAndBridges] dump: " + bridgeSet.toString());
     }
 }

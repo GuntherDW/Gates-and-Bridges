@@ -22,6 +22,7 @@ import java.util.logging.Logger;
  */
 public class GatesAndBridgesRedstoneListener extends BlockListener {
     private final static Logger log = Logger.getLogger("Minecraft");
+
     public void onBlockRedstoneChange(BlockRedstoneEvent event) {
         Block block = event.getBlock();
         Block tempBlock = null;
@@ -30,23 +31,37 @@ public class GatesAndBridgesRedstoneListener extends BlockListener {
                 for (int dz = -1; dz <= 1; dz++) {
                     tempBlock = block.getRelative(dx, dy, dz);
                     if (tempBlock.getType() == Material.SIGN_POST || tempBlock.getType() == Material.WALL_SIGN) {
-                        //Check for valid type ([Bridge] or [Gate])
                         BlockState state = tempBlock.getState();
                         if (state instanceof Sign) {
                             Sign s = (Sign) state;
                             if (s.getLine(1).equals("[Bridge]") || s.getLine(1).equals("[Gate]")) {
                                 GatesAndBridgesSign sign = new GatesAndBridgesSign(s);
                                 if (sign.getMechanicsType() == MechanicsType.GATE) {
+                                    if (event.getNewCurrent() == event.getOldCurrent())
+                                        return;
                                     Gate gate = sign.gateFactory();
                                     if (!gate.isValidGate())
                                         return;
-                                    gate.toggleGate();
+                                    if (event.getNewCurrent() == 0 && gate.isClosed()) {
+                                        gate.openGate();
+                                    } else if (!gate.isClosed() && event.getNewCurrent() > 0 ) {
+                                        gate.closeGate();
+                                    } else {
+                                        return;
+                                    }
                                 } else if (sign.getMechanicsType() == MechanicsType.BRIDGE) {
-                                    log.info("Toggling Bridge...");
+                                    if (event.getNewCurrent() == event.getOldCurrent())
+                                        return;
                                     Bridge bridge = sign.bridgeFactory();
                                     if (!bridge.isValidBridge())
                                         return;
-                                    bridge.toggleBridge();
+                                    if (event.getNewCurrent() == 0 && bridge.isClosed()) {
+                                        bridge.openBridge();
+                                    } else if (!bridge.isClosed() && event.getNewCurrent() > 0) {
+                                        bridge.closeBridge();
+                                    } else {
+                                        return;
+                                    }
                                 } else {
                                     return;
                                 }

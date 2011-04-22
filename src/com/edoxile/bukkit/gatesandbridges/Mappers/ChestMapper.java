@@ -61,16 +61,14 @@ public class ChestMapper {
             for (ItemStack i : hashMap.values()) {
                 amount += i.getAmount();
             }
-            itemStack = new ItemStack(m, amount);
-            hashMap = chest.getInventory().addItem(itemStack);
-            if (!hashMap.isEmpty()) {
-                log.info("[GatesAndBridges] Strange things are happening with chests...");
-                GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "Something is going wrong!");
-                return false;
-            } else {
-                GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "Not enough items of type: " + m.name() + " in chest!");
-                return false;
+            if ((a - amount) > 0) {
+                itemStack.setAmount(a - amount);
+                hashMap = chest.getInventory().addItem(itemStack);
             }
+            if (GatesAndBridgesPlayerListener.player != null) {
+                GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "Not enough items of type: " + m.name() + " in chest!");
+            }
+            return false;
         } else {
             return true;
         }
@@ -81,9 +79,11 @@ public class ChestMapper {
         HashMap<Integer, ItemStack> hashMap = chest.getInventory().addItem(itemStack);
         if (!hashMap.isEmpty()) {
             log.info("[GatesAndBridges] Couldn't fit all items in chest.");
-            GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.AQUA + "Couldn't fit all items in chest, placed the rest in your inventory.");
-            for (ItemStack i : hashMap.values()) {
-                GatesAndBridgesPlayerListener.player.getInventory().addItem(i);
+            if (GatesAndBridgesPlayerListener.player != null) {
+                GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.AQUA + "Couldn't fit all items in chest, placed the rest in your inventory.");
+                for (ItemStack i : hashMap.values()) {
+                    GatesAndBridgesPlayerListener.player.getInventory().addItem(i);
+                }
             }
             return false;
         } else {
