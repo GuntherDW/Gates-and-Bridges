@@ -35,7 +35,9 @@ public class Bridge {
                 if (chestMapper.mapChest(sign.getBlock())) {
                     return true;
                 } else {
-                    GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "No chest found close to sign.");
+                    if (GatesAndBridgesPlayerListener.player != null) {
+                        GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "No chest found close to sign.");
+                    }
                     return false;
                 }
             }
@@ -54,7 +56,9 @@ public class Bridge {
                 blocks++;
             }
             if (chestMapper.addMaterial(Material.WOOD, blocks)) {
-                GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.GREEN + "Bridge opened!");
+                if (GatesAndBridgesPlayerListener.player != null) {
+                    GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.GREEN + "Bridge opened!");
+                }
             }
         } else {
             //Close
@@ -65,14 +69,18 @@ public class Bridge {
                 blocks++;
             }
             if (chestMapper.removeMaterial(Material.WOOD, blocks)) {
-                GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.GREEN + "Bridge closed!");
+                if (GatesAndBridgesPlayerListener.player != null) {
+                    GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.GREEN + "Bridge closed!");
+                }
             } else {
                 for (Block b : bridgeMapper.getSet()) {
                     Block tempBlock = b;
                     tempBlock.setType(Material.AIR);
                     blocks++;
                 }
-                GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.YELLOW + "Bridge remains unchanged...");
+                if (GatesAndBridgesPlayerListener.player != null) {
+                    GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.YELLOW + "Bridge remains unchanged...");
+                }
             }
         }
         return false;

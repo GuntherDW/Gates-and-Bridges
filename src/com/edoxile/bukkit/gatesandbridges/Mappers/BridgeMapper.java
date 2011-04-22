@@ -51,7 +51,9 @@ public class BridgeMapper {
                 d++;
             }
         } while (d <= 30);
-        GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "Couldn't find [Bridge] or [Bridge End].");
+        if (GatesAndBridgesPlayerListener.player != null) {
+            GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "Couldn't find [Bridge] or [Bridge End].");
+        }
         return null;
     }
 
@@ -63,13 +65,15 @@ public class BridgeMapper {
         } else if (s.getRelative(BlockFace.DOWN).getType() == Material.WOOD) {
             dy = -1;
         } else {
-            GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "Bridges need to be made of wood!");
+            if (GatesAndBridgesPlayerListener.player != null) {
+                GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "Bridges need to be made of wood!");
+            }
             return;
         }
 
         switch (d) {
             case WEST: {
-                for (int dz = 1; dz < e.getLocation().getBlockZ()-s.getLocation().getBlockZ(); dz++) {
+                for (int dz = 1; dz < e.getLocation().getBlockZ() - s.getLocation().getBlockZ(); dz++) {
                     for (int dx = -1; dx <= 1; dx++) {
                         bridgeSet.add(s.getRelative(dx, dy, dz));
                     }
@@ -77,7 +81,7 @@ public class BridgeMapper {
             }
             break;
             case EAST: {
-                for (int dz = -1; dz > e.getLocation().getBlockZ()-s.getLocation().getBlockZ(); dz--) {
+                for (int dz = -1; dz > e.getLocation().getBlockZ() - s.getLocation().getBlockZ(); dz--) {
                     for (int dx = -1; dx <= 1; dx++) {
                         bridgeSet.add(s.getRelative(dx, dy, dz));
                     }
@@ -85,7 +89,7 @@ public class BridgeMapper {
             }
             break;
             case NORTH: {
-                for (int dx = -1; dx > e.getLocation().getBlockX()-s.getLocation().getBlockX(); dx--) {
+                for (int dx = -1; dx > e.getLocation().getBlockX() - s.getLocation().getBlockX(); dx--) {
                     for (int dz = -1; dz <= 1; dz++) {
                         bridgeSet.add(s.getRelative(dx, dy, dz));
                     }
@@ -93,7 +97,7 @@ public class BridgeMapper {
             }
             break;
             case SOUTH: {
-                for (int dx = 1; dx < e.getLocation().getBlockX()-s.getLocation().getBlockX(); dx++) {
+                for (int dx = 1; dx < e.getLocation().getBlockX() - s.getLocation().getBlockX(); dx++) {
                     for (int dz = -1; dz <= 1; dz++) {
                         bridgeSet.add(s.getRelative(dx, dy, dz));
                     }

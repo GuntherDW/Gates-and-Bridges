@@ -4,7 +4,6 @@ import com.edoxile.bukkit.gatesandbridges.Bridge;
 import com.edoxile.bukkit.gatesandbridges.Gate;
 import com.edoxile.bukkit.gatesandbridges.GatesAndBridgesSign;
 import com.edoxile.bukkit.gatesandbridges.MechanicsType;
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -29,29 +28,37 @@ public class GatesAndBridgesPlayerListener extends PlayerListener {
                 case WALL_SIGN: {
                     Sign s = null;
                     BlockState state = event.getClickedBlock().getState();
-                    if(state instanceof Sign){
+                    if (state instanceof Sign) {
                         s = (Sign) state;
-                    }else{
+                    } else {
                         return;
                     }
                     player = event.getPlayer();
                     GatesAndBridgesSign sign = new GatesAndBridgesSign(s);
                     if (sign.getMechanicsType() == MechanicsType.GATE) {
                         Gate gate = sign.gateFactory();
-                        if (!gate.isValidGate())
+                        if (!gate.isValidGate()) {
+                            player = null;
                             return;
+                        }
                         gate.toggleGate();
-                    }else if (sign.getMechanicsType() == MechanicsType.BRIDGE) {
+                        player = null;
+                    } else if (sign.getMechanicsType() == MechanicsType.BRIDGE) {
                         Bridge bridge = sign.bridgeFactory();
-                        if (!bridge.isValidBridge())
+                        if (!bridge.isValidBridge()) {
+                            player = null;
                             return;
+                        }
                         bridge.toggleBridge();
+                        player = null;
                     } else {
+                        player = null;
                         return;
                     }
                 }
                 break;
                 default:
+                    player = null;
                     return;
             }
 

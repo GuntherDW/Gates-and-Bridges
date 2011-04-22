@@ -35,7 +35,9 @@ public class Gate {
                 if (chestMapper.mapChest(sign.getBlock())) {
                     return true;
                 } else {
-                    GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "No chest found close to sign.");
+                    if (GatesAndBridgesPlayerListener.player != null) {
+                        GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "No chest found close to sign.");
+                    }
                     return false;
                 }
             } else {
@@ -57,7 +59,9 @@ public class Gate {
                 }
             }
             if (chestMapper.addMaterial(Material.FENCE, fences)) {
-                GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.GREEN + "Gate opened!");
+                if (GatesAndBridgesPlayerListener.player != null) {
+                    GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.GREEN + "Gate opened!");
+                }
             }
         } else {
             //Close
@@ -71,7 +75,9 @@ public class Gate {
                 }
             }
             if (chestMapper.removeMaterial(Material.FENCE, fences)) {
-                GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.GREEN + "Gate closed!");
+                if (GatesAndBridgesPlayerListener.player != null) {
+                    GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.GREEN + "Gate closed!");
+                }
             } else {
                 for (Block b : gateMapper.getSet()) {
                     Block tempBlock = b;
@@ -81,7 +87,9 @@ public class Gate {
                         fences++;
                     }
                 }
-                GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.YELLOW + "Gate remains unchanged...");
+                if (GatesAndBridgesPlayerListener.player != null) {
+                    GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.YELLOW + "Gate remains unchanged...");
+                }
             }
         }
         return false;
