@@ -49,50 +49,11 @@ public class Gate {
     public boolean toggleGate() {
         if (gateMapper.isClosed()) {
             //Open
-            int fences = 0;
-            for (Block b : gateMapper.getSet()) {
-                Block tempBlock = b;
-                while (tempBlock.getRelative(BlockFace.DOWN).getType() == Material.FENCE) {
-                    tempBlock = tempBlock.getRelative(BlockFace.DOWN);
-                    tempBlock.setType(Material.AIR);
-                    fences++;
-                }
-            }
-            if (chestMapper.addMaterial(Material.FENCE, fences)) {
-                if (GatesAndBridgesPlayerListener.player != null) {
-                    GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.GREEN + "Gate opened!");
-                }
-            }
+            return openGate();
         } else {
             //Close
-            int fences = 0;
-            for (Block b : gateMapper.getSet()) {
-                Block tempBlock = b;
-                while (tempBlock.getRelative(BlockFace.DOWN).getType() == Material.AIR) {
-                    tempBlock = tempBlock.getRelative(BlockFace.DOWN);
-                    tempBlock.setType(Material.FENCE);
-                    fences++;
-                }
-            }
-            if (chestMapper.removeMaterial(Material.FENCE, fences)) {
-                if (GatesAndBridgesPlayerListener.player != null) {
-                    GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.GREEN + "Gate closed!");
-                }
-            } else {
-                for (Block b : gateMapper.getSet()) {
-                    Block tempBlock = b;
-                    while (tempBlock.getRelative(BlockFace.DOWN).getType() == Material.FENCE) {
-                        tempBlock = tempBlock.getRelative(BlockFace.DOWN);
-                        tempBlock.setType(Material.AIR);
-                        fences++;
-                    }
-                }
-                if (GatesAndBridgesPlayerListener.player != null) {
-                    GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.YELLOW + "Gate remains unchanged...");
-                }
-            }
+            return closeGate();
         }
-        return false;
     }
 
     public boolean openGate() {
@@ -110,7 +71,7 @@ public class Gate {
         } else {
             for (Block b : gateMapper.getSet()) {
                 Block tempBlock = b;
-                while (tempBlock.getRelative(BlockFace.DOWN).getType() == Material.AIR) {
+                while (canPassThrough(tempBlock.getRelative(BlockFace.DOWN).getType())){
                     tempBlock = tempBlock.getRelative(BlockFace.DOWN);
                     tempBlock.setType(Material.FENCE);
                 }
@@ -123,7 +84,7 @@ public class Gate {
         int fences = 0;
         for (Block b : gateMapper.getSet()) {
             Block tempBlock = b;
-            while (tempBlock.getRelative(BlockFace.DOWN).getType() == Material.AIR) {
+            while (canPassThrough(tempBlock.getRelative(BlockFace.DOWN).getType())){
                 tempBlock = tempBlock.getRelative(BlockFace.DOWN);
                 tempBlock.setType(Material.FENCE);
                 fences++;
@@ -145,5 +106,19 @@ public class Gate {
 
     public boolean isClosed(){
         return gateMapper.isClosed();
+    }
+
+    private static boolean canPassThrough(Material m) {
+        switch (m) {
+            case AIR:
+            case WATER:
+            case STATIONARY_WATER:
+            case LAVA:
+            case STATIONARY_LAVA:
+            case SNOW:
+                return true;
+            default:
+                return false;
+        }
     }
 }
