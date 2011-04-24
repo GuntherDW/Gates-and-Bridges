@@ -11,13 +11,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerListener;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Edoxile
- * Date: 18-4-11
- * Time: 21:50
- * To change this template use File | Settings | File Templates.
- */
 public class GatesAndBridgesPlayerListener extends PlayerListener {
     public static Player player = null;
 

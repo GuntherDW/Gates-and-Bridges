@@ -13,13 +13,6 @@ import org.bukkit.event.block.BlockRedstoneEvent;
 
 import java.util.logging.Logger;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Edoxile
- * Date: 19-4-11
- * Time: 8:45
- * To change this template use File | Settings | File Templates.
- */
 public class GatesAndBridgesRedstoneListener extends BlockListener {
     private final static Logger log = Logger.getLogger("Minecraft");
 

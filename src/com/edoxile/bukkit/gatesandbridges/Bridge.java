@@ -1,7 +1,6 @@
 package com.edoxile.bukkit.gatesandbridges;
 
 import com.edoxile.bukkit.gatesandbridges.Listeners.GatesAndBridgesPlayerListener;
-import com.edoxile.bukkit.gatesandbridges.Mappers.ChestMapper;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -32,7 +31,7 @@ public class Bridge {
         }
     }
 
-    public Block getEndBlock(Block block, BlockFace blockFace) {
+    private Block getEndBlock(Block block, BlockFace blockFace) {
         int d = 0;
         Block tempBlock = block;
         do {
@@ -57,7 +56,7 @@ public class Bridge {
         return null;
     }
 
-    public void listBlocks(Block s, Block e, BlockFace d) {
+    private void listBlocks(Block s, Block e, BlockFace d) {
         bridgeSet.clear();
         Block tempBlock = null;
         int dy = 0;

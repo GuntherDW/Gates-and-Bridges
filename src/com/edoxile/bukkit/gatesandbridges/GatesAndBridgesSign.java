@@ -7,13 +7,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Edoxile
- * Date: 19-4-11
- * Time: 9:07
- * To change this template use File | Settings | File Templates.
- */
 public class GatesAndBridgesSign {
     Sign sign = null;
 

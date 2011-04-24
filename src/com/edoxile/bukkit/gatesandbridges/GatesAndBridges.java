@@ -7,13 +7,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Logger;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Edoxile
- * Date: 18-4-11
- * Time: 21:48
- * To change this template use File | Settings | File Templates.
- */
 public class GatesAndBridges extends JavaPlugin {
     private final static Logger log = Logger.getLogger("Minecraft");
     GatesAndBridgesPlayerListener playerListener = new GatesAndBridgesPlayerListener();

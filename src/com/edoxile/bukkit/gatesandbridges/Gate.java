@@ -1,25 +1,18 @@
 package com.edoxile.bukkit.gatesandbridges;
 
 import com.edoxile.bukkit.gatesandbridges.Listeners.GatesAndBridgesPlayerListener;
-import com.edoxile.bukkit.gatesandbridges.Mappers.ChestMapper;
-import com.edoxile.bukkit.gatesandbridges.Mappers.GateMapper;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
+import java.util.HashSet;
 import java.util.logging.Logger;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Edoxile
- * Date: 19-4-11
- * Time: 8:51
- * To change this template use File | Settings | File Templates.
- */
 public class Gate {
     private final static Logger log = Logger.getLogger("Minecraft");
-    private GateMapper gateMapper = new GateMapper();
+    private Block startBlock = null;
+    private HashSet<Block> fenceSet = new HashSet<Block>();
     private ChestMapper chestMapper = new ChestMapper();
     GatesAndBridgesSign sign = null;
 
@@ -31,7 +24,7 @@ public class Gate {
         if (sign.getBackBlock() == null) {
             return false;
         } else {
-            if (gateMapper.mapGate(sign.getBackBlock())) {
+            if (mapGate(sign.getBackBlock())) {
                 if (chestMapper.mapChest(sign.getBlock())) {
                     return true;
                 } else {
@@ -47,7 +40,7 @@ public class Gate {
     }
 
     public boolean toggleGate() {
-        if (gateMapper.isClosed()) {
+        if (isClosed()) {
             //Open
             return openGate();
         } else {
@@ -58,7 +51,7 @@ public class Gate {
 
     public boolean openGate() {
         int fences = 0;
-        for (Block b : gateMapper.getSet()) {
+        for (Block b : fenceSet) {
             Block tempBlock = b;
             while (tempBlock.getRelative(BlockFace.DOWN).getType() == Material.FENCE) {
                 tempBlock = tempBlock.getRelative(BlockFace.DOWN);
@@ -69,7 +62,7 @@ public class Gate {
         if (chestMapper.addMaterial(Material.FENCE, fences)) {
             return true;
         } else {
-            for (Block b : gateMapper.getSet()) {
+            for (Block b : fenceSet) {
                 Block tempBlock = b;
                 while (canPassThrough(tempBlock.getRelative(BlockFace.DOWN).getType())){
                     tempBlock = tempBlock.getRelative(BlockFace.DOWN);
@@ -82,7 +75,7 @@ public class Gate {
 
     public boolean closeGate() {
         int fences = 0;
-        for (Block b : gateMapper.getSet()) {
+        for (Block b : fenceSet) {
             Block tempBlock = b;
             while (canPassThrough(tempBlock.getRelative(BlockFace.DOWN).getType())){
                 tempBlock = tempBlock.getRelative(BlockFace.DOWN);
@@ -93,7 +86,7 @@ public class Gate {
         if (chestMapper.removeMaterial(Material.FENCE, fences)) {
             return true;
         } else {
-            for (Block b : gateMapper.getSet()) {
+            for (Block b : fenceSet) {
                 Block tempBlock = b;
                 while (tempBlock.getRelative(BlockFace.DOWN).getType() == Material.FENCE) {
                     tempBlock = tempBlock.getRelative(BlockFace.DOWN);
@@ -105,7 +98,7 @@ public class Gate {
     }
 
     public boolean isClosed(){
-        return gateMapper.isClosed();
+        return startBlock.getRelative(BlockFace.DOWN).getType() == Material.FENCE;
     }
 
     private static boolean canPassThrough(Material m) {
@@ -119,6 +112,62 @@ public class Gate {
                 return true;
             default:
                 return false;
+        }
+    }
+
+    private boolean mapGate(Block s) {
+        startBlock = getStartBlock(s);
+        if (startBlock == null) {
+            return false;
+        } else {
+            fenceSet.clear();
+            fenceSet.add(startBlock);
+            listFences(startBlock);
+            return true;
+        }
+    }
+
+    private Block getStartBlock(Block startBlock) {
+        Block tempBlock;
+        for (int dy = -1; dy <= 64; dy++) {
+            for (int dx = -1; dx <= 1; dx += 2) {
+                tempBlock = startBlock.getRelative(dx, dy, 0);
+                if (tempBlock.getType() == Material.FENCE)
+                    return getTopFence(tempBlock);
+            }
+            for (int dz = -1; dz <= 1; dz += 2) {
+                tempBlock = startBlock.getRelative(0, dy, dz);
+                if (tempBlock.getType() == Material.FENCE)
+                    return getTopFence(tempBlock);
+            }
+        }
+        return null;
+    }
+
+    private Block getTopFence(Block startBlock) {
+        int dy = 1;
+        Block tempBlock = startBlock;
+        while (tempBlock.getRelative(BlockFace.UP).getType() == Material.FENCE) {
+            tempBlock = tempBlock.getRelative(BlockFace.UP);
+        }
+        return tempBlock;
+    }
+
+    private void listFences(Block s) {
+        Block tempBlock;
+        for (int dx = -1; dx <= 1; dx += 2) {
+            tempBlock = s.getRelative(dx, 0, 0);
+            if (tempBlock.getType() == Material.FENCE && (!fenceSet.contains(tempBlock))) {
+                fenceSet.add(tempBlock);
+                listFences(tempBlock);
+            }
+        }
+        for (int dz = -1; dz <= 1; dz += 2) {
+            tempBlock = s.getRelative(0, 0, dz);
+            if (tempBlock.getType() == Material.FENCE && (!fenceSet.contains(tempBlock))) {
+                fenceSet.add(tempBlock);
+                listFences(tempBlock);
+            }
         }
     }
 }
