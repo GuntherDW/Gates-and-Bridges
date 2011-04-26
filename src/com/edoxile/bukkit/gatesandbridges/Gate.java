@@ -1,10 +1,14 @@
 package com.edoxile.bukkit.gatesandbridges;
 
-import com.edoxile.bukkit.gatesandbridges.Listeners.GatesAndBridgesPlayerListener;
+import com.edoxile.bukkit.gatesandbridges.Exceptions.InsufficientMaterialsException;
+import com.edoxile.bukkit.gatesandbridges.Exceptions.InsufficientSpaceException;
+import com.edoxile.bukkit.gatesandbridges.Exceptions.InvalidSizeException;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Player;
+import org.bukkit.util.config.Configuration;
 
 import java.util.HashSet;
 import java.util.logging.Logger;
@@ -14,10 +18,16 @@ public class Gate {
     private Block startBlock = null;
     private HashSet<Block> fenceSet = new HashSet<Block>();
     private ChestMapper chestMapper = new ChestMapper();
-    GatesAndBridgesSign sign = null;
+    private GatesAndBridgesSign sign = null;
+    private Player player = null;
+    private Configuration config = null;
+    private static int width = 0;
+    private static int length = 0;
 
-    public Gate(GatesAndBridgesSign s) {
+    public Gate(GatesAndBridgesSign s, Player p, Configuration c) {
         sign = s;
+        player = p;
+        config = c;
     }
 
     public boolean isValidGate() {
@@ -28,8 +38,8 @@ public class Gate {
                 if (chestMapper.mapChest(sign.getBlock())) {
                     return true;
                 } else {
-                    if (GatesAndBridgesPlayerListener.player != null) {
-                        GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "No chest found close to sign.");
+                    if (player != null) {
+                        player.sendMessage(ChatColor.RED + "No chest found near sign!");
                     }
                     return false;
                 }
@@ -59,12 +69,17 @@ public class Gate {
                 fences++;
             }
         }
-        if (chestMapper.addMaterial(Material.FENCE, fences)) {
+        try {
+            chestMapper.addMaterial(Material.FENCE, fences);
             return true;
-        } else {
+        } catch (InsufficientSpaceException ex) {
+            if (player != null) {
+                player.sendMessage(ChatColor.RED + "Not enough space in chest! Items lost!");
+            }
+            log.info("[Gates and Bridges] Not enough space in chest. Gate position: {x=" + Integer.toString(sign.getBlock().getLocation().getBlockX()) + "; z=" + Integer.toString(sign.getBlock().getLocation().getBlockZ()));
             for (Block b : fenceSet) {
                 Block tempBlock = b;
-                while (canPassThrough(tempBlock.getRelative(BlockFace.DOWN).getType())){
+                while (canPassThrough(tempBlock.getRelative(BlockFace.DOWN).getType())) {
                     tempBlock = tempBlock.getRelative(BlockFace.DOWN);
                     tempBlock.setType(Material.FENCE);
                 }
@@ -77,15 +92,19 @@ public class Gate {
         int fences = 0;
         for (Block b : fenceSet) {
             Block tempBlock = b;
-            while (canPassThrough(tempBlock.getRelative(BlockFace.DOWN).getType())){
+            while (canPassThrough(tempBlock.getRelative(BlockFace.DOWN).getType())) {
                 tempBlock = tempBlock.getRelative(BlockFace.DOWN);
                 tempBlock.setType(Material.FENCE);
                 fences++;
             }
         }
-        if (chestMapper.removeMaterial(Material.FENCE, fences)) {
+        try {
+            chestMapper.removeMaterial(Material.FENCE, fences);
             return true;
-        } else {
+        } catch (InsufficientMaterialsException ex) {
+            if (player != null) {
+                player.sendMessage(ChatColor.RED + "Not enough materials in chest! Gate not closed!");
+            }
             for (Block b : fenceSet) {
                 Block tempBlock = b;
                 while (tempBlock.getRelative(BlockFace.DOWN).getType() == Material.FENCE) {
@@ -97,7 +116,7 @@ public class Gate {
         }
     }
 
-    public boolean isClosed(){
+    public boolean isClosed() {
         return startBlock.getRelative(BlockFace.DOWN).getType() == Material.FENCE;
     }
 
@@ -117,13 +136,23 @@ public class Gate {
 
     private boolean mapGate(Block s) {
         startBlock = getStartBlock(s);
+        width = 0;
+        length = 0;
         if (startBlock == null) {
             return false;
         } else {
             fenceSet.clear();
             fenceSet.add(startBlock);
-            listFences(startBlock);
-            return true;
+            try {
+                listFences(startBlock);
+                checkGateSize();
+                return true;
+            } catch (InvalidSizeException ex) {
+                if (player != null) {
+                    player.sendMessage(ChatColor.RED + "Gate is too long or too wide!");
+                }
+                return false;
+            }
         }
     }
 
@@ -153,12 +182,16 @@ public class Gate {
         return tempBlock;
     }
 
-    private void listFences(Block s) {
+    private void listFences(Block s) throws InvalidSizeException {
         Block tempBlock;
         for (int dx = -1; dx <= 1; dx += 2) {
             tempBlock = s.getRelative(dx, 0, 0);
             if (tempBlock.getType() == Material.FENCE && (!fenceSet.contains(tempBlock))) {
                 fenceSet.add(tempBlock);
+                if ((Math.abs(tempBlock.getLocation().getBlockZ() - startBlock.getLocation().getBlockZ()) + 1) > width)
+                    width = Math.abs(tempBlock.getLocation().getBlockZ() - startBlock.getLocation().getBlockZ()) + 1;
+                if ((Math.abs(tempBlock.getLocation().getBlockX() - startBlock.getLocation().getBlockX()) + 1) > length)
+                    length = Math.abs(tempBlock.getLocation().getBlockX() - startBlock.getLocation().getBlockX()) + 1;
                 listFences(tempBlock);
             }
         }
@@ -166,7 +199,31 @@ public class Gate {
             tempBlock = s.getRelative(0, 0, dz);
             if (tempBlock.getType() == Material.FENCE && (!fenceSet.contains(tempBlock))) {
                 fenceSet.add(tempBlock);
+                if ((Math.abs(tempBlock.getLocation().getBlockZ() - startBlock.getLocation().getBlockZ()) + 1) > width)
+                    width = Math.abs(tempBlock.getLocation().getBlockZ() - startBlock.getLocation().getBlockZ()) + 1;
+                if ((Math.abs(tempBlock.getLocation().getBlockX() - startBlock.getLocation().getBlockX()) + 1) > length)
+                    length = Math.abs(tempBlock.getLocation().getBlockX() - startBlock.getLocation().getBlockX()) + 1;
                 listFences(tempBlock);
+            }
+        }
+    }
+
+    private void checkGateSize() throws InvalidSizeException {
+        log.info("Gate width: " + Integer.toString(width) + ", length: " + Integer.toString(length));
+        if (width > length) {
+            if (width > config.getInt("gate.max-length", 30) || length > config.getInt("gate.max-width", 3)) {
+                log.info("Gate to large, width: " + Integer.toString(width) + ", length: " + Integer.toString(length));
+                fenceSet.clear();
+                throw new InvalidSizeException();
+            } else {
+                return;
+            }
+        } else {
+            if (length > config.getInt("gate.max-length", 30) || width > config.getInt("gate.max-width", 3)) {
+                fenceSet.clear();
+                throw new InvalidSizeException();
+            } else {
+                return;
             }
         }
     }

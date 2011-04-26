@@ -10,48 +10,47 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerListener;
+import org.bukkit.util.config.Configuration;
 
 public class GatesAndBridgesPlayerListener extends PlayerListener {
-    public static Player player = null;
+
+    private Configuration config = null;
+
+    public GatesAndBridgesPlayerListener(Configuration c){
+        config = c;
+    }
 
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             switch (event.getClickedBlock().getType()) {
                 case SIGN_POST:
                 case WALL_SIGN: {
-                    Sign s = null;
+                    Sign s;
                     BlockState state = event.getClickedBlock().getState();
                     if (state instanceof Sign) {
                         s = (Sign) state;
                     } else {
                         return;
                     }
-                    player = event.getPlayer();
-                    GatesAndBridgesSign sign = new GatesAndBridgesSign(s);
+                    GatesAndBridgesSign sign = new GatesAndBridgesSign(s, event.getPlayer(), config);
                     if (sign.getMechanicsType() == MechanicsType.GATE) {
                         Gate gate = sign.gateFactory();
                         if (!gate.isValidGate()) {
-                            player = null;
                             return;
                         }
                         gate.toggleGate();
-                        player = null;
                     } else if (sign.getMechanicsType() == MechanicsType.BRIDGE) {
                         Bridge bridge = sign.bridgeFactory();
                         if (!bridge.isValidBridge()) {
-                            player = null;
                             return;
                         }
                         bridge.toggleBridge();
-                        player = null;
                     } else {
-                        player = null;
                         return;
                     }
                 }
                 break;
                 default:
-                    player = null;
                     return;
             }
 

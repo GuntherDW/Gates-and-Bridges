@@ -1,20 +1,28 @@
 package com.edoxile.bukkit.gatesandbridges;
 
-import com.edoxile.bukkit.gatesandbridges.Listeners.GatesAndBridgesPlayerListener;
+import com.edoxile.bukkit.gatesandbridges.Exceptions.*;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
+import org.bukkit.util.config.Configuration;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class Bridge {
     private final static Logger log = Logger.getLogger("Minecraft");
     private ChestMapper chestMapper = new ChestMapper();
-    GatesAndBridgesSign sign = null;
+    private GatesAndBridgesSign sign = null;
+    private Player player = null;
+    private ItemStack bridgeMaterial = null;
+    private Configuration config = null;
 
     private Block startBlock = null;
     private Block endBlock = null;
@@ -22,16 +30,34 @@ public class Bridge {
 
     public boolean mapBridge(Block block, BlockFace blockFace) {
         startBlock = block;
-        endBlock = getEndBlock(block, blockFace);
-        if (endBlock == null) {
-            return false;
-        } else {
+        try {
+            endBlock = getEndBlock(block, blockFace);
             listBlocks(startBlock, endBlock, blockFace);
             return true;
+        } catch (InvalidSizeException ex) {
+            if (player != null) {
+                player.sendMessage(ChatColor.RED + "Bridge is too long! Maximum length: " + Integer.toString(config.getInt("bridge.max-length", 30)));
+            }
+            return false;
+        } catch (AsymmetricalBridgeException ex) {
+            if (player != null) {
+                player.sendMessage(ChatColor.RED + "Bridge needs to be made of the same materials on both sides!");
+            }
+            return false;
+        } catch (InvalidBridgeMaterialException ex) {
+            if (player != null) {
+                player.sendMessage(ChatColor.RED + "Bridge is not made of an allowed bridge material!");
+            }
+            return false;
+        } catch (InvalidNotationException ex) {
+            if (player != null) {
+                player.sendMessage(ChatColor.RED + "There is a typo on your sign!");
+            }
+            return false;
         }
     }
 
-    private Block getEndBlock(Block block, BlockFace blockFace) {
+    private Block getEndBlock(Block block, BlockFace blockFace) throws InvalidSizeException {
         int d = 0;
         Block tempBlock = block;
         do {
@@ -49,34 +75,38 @@ public class Bridge {
             } else {
                 d++;
             }
-        } while (d <= 30);
-        if (GatesAndBridgesPlayerListener.player != null) {
-            GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "Couldn't find [Bridge] or [Bridge End].");
-        }
-        return null;
+        } while (d <= config.getInt("bridge.max-length", 50));
+        throw new InvalidSizeException();
     }
 
-    private void listBlocks(Block s, Block e, BlockFace d) {
+    /**
+     * TODO Check for [Width x], set width;
+     */
+    private void listBlocks(Block s, Block e, BlockFace d) throws InvalidNotationException, InvalidBridgeMaterialException, AsymmetricalBridgeException {
         bridgeSet.clear();
-        Block tempBlock = null;
+        Block tempBlock;
         int dy = 0;
-        if (s.getRelative(BlockFace.UP).getType() == Material.WOOD) {
-            dy = 1;
-        } else if (s.getRelative(BlockFace.DOWN).getType() == Material.WOOD) {
-            dy = -1;
-        } else {
-            if (GatesAndBridgesPlayerListener.player != null) {
-                GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "Bridges need to be made of wood!");
+        if (allowedBridgeMaterial(s.getRelative(BlockFace.UP).getType())) {
+            if (s.getRelative(BlockFace.UP).getType() != e.getRelative(BlockFace.UP).getType()) {
+                throw new AsymmetricalBridgeException();
             }
-            return;
+            dy = 1;
+            bridgeMaterial = new MaterialData(s.getRelative(BlockFace.UP).getType(), s.getRelative(BlockFace.UP).getData()).toItemStack();
+        } else if (allowedBridgeMaterial(s.getRelative(BlockFace.DOWN).getType())) {
+            if (s.getRelative(BlockFace.UP).getType() != e.getRelative(BlockFace.UP).getType()) {
+                throw new AsymmetricalBridgeException();
+            }
+            dy = -1;
+            bridgeMaterial = new MaterialData(s.getRelative(BlockFace.UP).getType(), s.getRelative(BlockFace.UP).getData()).toItemStack();
+        } else {
+            throw new InvalidBridgeMaterialException();
         }
-
         switch (d) {
             case WEST: {
                 for (int dz = 1; dz < e.getLocation().getBlockZ() - s.getLocation().getBlockZ(); dz++) {
                     for (int dx = -1; dx <= 1; dx++) {
-                        tempBlock = s.getRelative(dx,dy,dz);
-                        if (canPassThrough(tempBlock.getType()) || tempBlock.getType() == Material.WOOD)
+                        tempBlock = s.getRelative(dx, dy, dz);
+                        if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType() && tempBlock.getData() == bridgeMaterial.getData().getData()))
                             bridgeSet.add(tempBlock);
                     }
                 }
@@ -85,8 +115,8 @@ public class Bridge {
             case EAST: {
                 for (int dz = -1; dz > e.getLocation().getBlockZ() - s.getLocation().getBlockZ(); dz--) {
                     for (int dx = -1; dx <= 1; dx++) {
-                        tempBlock = s.getRelative(dx,dy,dz);
-                        if (canPassThrough(tempBlock.getType()) || tempBlock.getType() == Material.WOOD)
+                        tempBlock = s.getRelative(dx, dy, dz);
+                        if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType() && tempBlock.getData() == bridgeMaterial.getData().getData()))
                             bridgeSet.add(tempBlock);
                     }
                 }
@@ -95,8 +125,8 @@ public class Bridge {
             case NORTH: {
                 for (int dx = -1; dx > e.getLocation().getBlockX() - s.getLocation().getBlockX(); dx--) {
                     for (int dz = -1; dz <= 1; dz++) {
-                        tempBlock = s.getRelative(dx,dy,dz);
-                        if (canPassThrough(tempBlock.getType()) || tempBlock.getType() == Material.WOOD)
+                        tempBlock = s.getRelative(dx, dy, dz);
+                        if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType() && tempBlock.getData() == bridgeMaterial.getData().getData()))
                             bridgeSet.add(tempBlock);
                     }
                 }
@@ -105,8 +135,8 @@ public class Bridge {
             case SOUTH: {
                 for (int dx = 1; dx < e.getLocation().getBlockX() - s.getLocation().getBlockX(); dx++) {
                     for (int dz = -1; dz <= 1; dz++) {
-                        tempBlock = s.getRelative(dx,dy,dz);
-                        if (canPassThrough(tempBlock.getType()) || tempBlock.getType() == Material.WOOD)
+                        tempBlock = s.getRelative(dx, dy, dz);
+                        if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType() && tempBlock.getData() == bridgeMaterial.getData().getData()))
                             bridgeSet.add(tempBlock);
                     }
                 }
@@ -118,27 +148,31 @@ public class Bridge {
         }
     }
 
-    public Bridge(GatesAndBridgesSign s) {
+    public Bridge(GatesAndBridgesSign s, Player p, Configuration c) {
         sign = s;
+        player = p;
+        config = c;
     }
 
     public boolean isValidBridge() {
         if (mapBridge(sign.getBlock(), sign.getSignBack())) {
-            if (chestMapper.mapChest(getEndBlock(sign.getBlock(), sign.getSignBack()))) {
-                return true;
-            } else {
-                if (chestMapper.mapChest(sign.getBlock())) {
+            try {
+                if (chestMapper.mapChest(getEndBlock(sign.getBlock(), sign.getSignBack()))) {
                     return true;
                 } else {
-                    if (GatesAndBridgesPlayerListener.player != null) {
-                        GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "No chest found close to sign.");
+                    if (chestMapper.mapChest(sign.getBlock())) {
+                        return true;
+                    } else {
+                        if (player != null) {
+                            player.sendMessage(ChatColor.RED + "No chest found near sign!");
+                        }
                     }
-                    return false;
                 }
+            } catch (InvalidSizeException ex) {
+                player.sendMessage(ChatColor.RED + "Bridge is too long or too wide (or both)!");
             }
-        } else {
-            return false;
         }
+        return false;
     }
 
     public boolean toggleBridge() {
@@ -158,12 +192,19 @@ public class Bridge {
             tempBlock.setType(Material.AIR);
             blocks++;
         }
-        if (chestMapper.addMaterial(Material.WOOD, blocks)) {
+        try {
+            bridgeMaterial.setAmount(blocks);
+            chestMapper.addMaterial(bridgeMaterial);
             return true;
-        } else {
+        } catch (InsufficientSpaceException ex) {
+            if (player != null) {
+                player.sendMessage(ChatColor.RED + "Not enough space in chest! Items lost!");
+            }
+            log.info("[Gates and Bridges] Not enough space in chest. Bridge position: {x=" + Integer.toString(sign.getBlock().getLocation().getBlockX()) + "; z=" + Integer.toString(sign.getBlock().getLocation().getBlockZ()));
             for (Block b : bridgeSet) {
                 Block tempBlock = b;
-                tempBlock.setType(Material.WOOD);
+                tempBlock.setType(bridgeMaterial.getType());
+                tempBlock.setData(bridgeMaterial.getData().getData());
             }
             return false;
         }
@@ -173,12 +214,18 @@ public class Bridge {
         int blocks = 0;
         for (Block b : bridgeSet) {
             Block tempBlock = b;
-            tempBlock.setType(Material.WOOD);
+                tempBlock.setType(bridgeMaterial.getType());
+                tempBlock.setData(bridgeMaterial.getData().getData());
             blocks++;
         }
-        if (chestMapper.removeMaterial(Material.WOOD, blocks)) {
+        try {
+            bridgeMaterial.setAmount(blocks);
+            chestMapper.removeMaterial(bridgeMaterial);
             return true;
-        } else {
+        } catch (InsufficientMaterialsException ex) {
+            if (player != null) {
+                player.sendMessage(ChatColor.RED + "Not enough materials in chest! Bridge not closed!");
+            }
             for (Block b : bridgeSet) {
                 Block tempBlock = b;
                 tempBlock.setType(Material.AIR);
@@ -189,13 +236,13 @@ public class Bridge {
 
     public boolean isClosed() {
         for (Block b : bridgeSet) {
-            return b.getType() == Material.WOOD;
+            return b.getType() == bridgeMaterial.getType();
         }
         log.info("[GatesAndBridges] blockSet empty!");
         return false;
     }
 
-    private static boolean canPassThrough(Material m) {
+    private boolean canPassThrough(Material m) {
         switch (m) {
             case AIR:
             case WATER:
@@ -207,5 +254,15 @@ public class Bridge {
             default:
                 return false;
         }
+    }
+
+    private boolean allowedBridgeMaterial(Material m) {
+        String[] materials = config.getString("bridge.materials").split(",");
+        for (String s : materials) {
+            if (m.toString().equalsIgnoreCase(s)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

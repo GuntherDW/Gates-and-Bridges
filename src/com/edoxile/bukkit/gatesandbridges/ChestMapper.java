@@ -1,12 +1,13 @@
 package com.edoxile.bukkit.gatesandbridges;
 
-import com.edoxile.bukkit.gatesandbridges.Listeners.GatesAndBridgesPlayerListener;
-import org.bukkit.ChatColor;
+import com.edoxile.bukkit.gatesandbridges.Exceptions.InsufficientMaterialsException;
+import com.edoxile.bukkit.gatesandbridges.Exceptions.InsufficientSpaceException;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -48,7 +49,25 @@ public class ChestMapper {
         return chest.getInventory().contains(m);
     }
 
-    public boolean removeMaterial(Material m, int a) {
+    public boolean removeMaterial(ItemStack itemStack) throws InsufficientMaterialsException{
+        int a = itemStack.getAmount();
+        HashMap<Integer, ItemStack> hashMap = chest.getInventory().removeItem(itemStack);
+        if (!hashMap.isEmpty()) {
+            int amount = 0;
+            for (ItemStack i : hashMap.values()) {
+                amount += i.getAmount();
+            }
+            if ((a - amount) > 0) {
+                itemStack.setAmount(a - amount);
+                hashMap = chest.getInventory().addItem(itemStack);
+            }
+            throw new InsufficientMaterialsException();
+        } else {
+            return true;
+        }
+    }
+
+    public boolean removeMaterial(Material m, int a) throws InsufficientMaterialsException {
         ItemStack itemStack = new ItemStack(m, a);
         HashMap<Integer, ItemStack> hashMap = chest.getInventory().removeItem(itemStack);
         if (!hashMap.isEmpty()) {
@@ -60,27 +79,28 @@ public class ChestMapper {
                 itemStack.setAmount(a - amount);
                 hashMap = chest.getInventory().addItem(itemStack);
             }
-            if (GatesAndBridgesPlayerListener.player != null) {
-                GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.RED + "Not enough items of type: " + m.name() + " in chest!");
-            }
-            return false;
+            throw new InsufficientMaterialsException();
         } else {
             return true;
         }
     }
 
-    public boolean addMaterial(Material m, int a) {
+    public boolean addMaterial(Material m, int a) throws InsufficientSpaceException {
         ItemStack itemStack = new ItemStack(m, a);
         HashMap<Integer, ItemStack> hashMap = chest.getInventory().addItem(itemStack);
         if (!hashMap.isEmpty()) {
             log.info("[GatesAndBridges] Couldn't fit all items in chest.");
-            if (GatesAndBridgesPlayerListener.player != null) {
-                GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.AQUA + "Couldn't fit all items in chest, placed the rest in your inventory.");
-                for (ItemStack i : hashMap.values()) {
-                    GatesAndBridgesPlayerListener.player.getInventory().addItem(i);
-                }
-            }
-            return false;
+            throw new InsufficientSpaceException();
+        } else {
+            return true;
+        }
+    }
+
+    public boolean addMaterial(ItemStack itemStack) throws InsufficientSpaceException {
+        HashMap<Integer, ItemStack> hashMap = chest.getInventory().addItem(itemStack);
+        if (!hashMap.isEmpty()) {
+            log.info("[GatesAndBridges] Couldn't fit all items in chest.");
+            throw new InsufficientSpaceException();
         } else {
             return true;
         }

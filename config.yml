@@ -1,0 +1,8 @@
+bridge:
+    max-length: 30
+    max-width: 50
+    default-width: 3
+    materials: COBBLESTONE,STONE,WOOD,STEP
+gate:
+    max-length: 30
+    max-width: 3

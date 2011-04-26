@@ -10,11 +10,17 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.util.config.Configuration;
 
 import java.util.logging.Logger;
 
 public class GatesAndBridgesRedstoneListener extends BlockListener {
     private final static Logger log = Logger.getLogger("Minecraft");
+    private Configuration config = null;
+
+    public GatesAndBridgesRedstoneListener(Configuration c){
+        config = c;
+    }
 
     public void onBlockRedstoneChange(BlockRedstoneEvent event) {
         Block block = event.getBlock();
@@ -28,7 +34,7 @@ public class GatesAndBridgesRedstoneListener extends BlockListener {
                         if (state instanceof Sign) {
                             Sign s = (Sign) state;
                             if (s.getLine(1).equals("[Bridge]") || s.getLine(1).equals("[Gate]")) {
-                                GatesAndBridgesSign sign = new GatesAndBridgesSign(s);
+                                GatesAndBridgesSign sign = new GatesAndBridgesSign(s, null, config);
                                 if (sign.getMechanicsType() == MechanicsType.GATE) {
                                     if (event.getNewCurrent() == event.getOldCurrent())
                                         return;

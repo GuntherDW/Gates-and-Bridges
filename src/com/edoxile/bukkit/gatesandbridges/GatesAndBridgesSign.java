@@ -1,17 +1,28 @@
 package com.edoxile.bukkit.gatesandbridges;
 
-import com.edoxile.bukkit.gatesandbridges.Listeners.GatesAndBridgesPlayerListener;
+import com.edoxile.bukkit.gatesandbridges.Exceptions.InvalidNotationException;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
+import org.bukkit.util.config.Configuration;
+
+import java.util.logging.Logger;
 
 public class GatesAndBridgesSign {
-    Sign sign = null;
+    private Sign sign = null;
+    private Player player = null;
+    private Configuration config = null;
+    private final static Logger log = Logger.getLogger("Minecraft");
 
-    public GatesAndBridgesSign(Sign s) {
+    public GatesAndBridgesSign(Sign s, Player p, Configuration c) {
         sign = s;
+        player = p;
+        config = c;
     }
 
     private boolean isBridgeOrGateSign() {
@@ -32,14 +43,14 @@ public class GatesAndBridgesSign {
 
     public Gate gateFactory() {
         if (getMechanicsType() == MechanicsType.GATE)
-            return new Gate(this);
+            return new Gate(this, player, config);
         else
             return null;
     }
 
     public Bridge bridgeFactory() {
         if (getMechanicsType() == MechanicsType.BRIDGE)
-            return new Bridge(this);
+            return new Bridge(this, player, config);
         else
             return null;
     }
@@ -59,7 +70,7 @@ public class GatesAndBridgesSign {
                     return null;
             }
         } else if (sign.getType() == Material.SIGN_POST) {
-            switch (sign.getData().getData()){
+            switch (sign.getData().getData()) {
                 case 0:
                     return BlockFace.EAST;
                 case 4:
@@ -91,7 +102,7 @@ public class GatesAndBridgesSign {
                     return null;
             }
         } else if (sign.getType() == Material.SIGN_POST) {
-            switch (sign.getData().getData()){
+            switch (sign.getData().getData()) {
                 case 0:
                     return BlockFace.WEST;
                 case 4:
@@ -108,25 +119,56 @@ public class GatesAndBridgesSign {
         }
     }
 
-    public boolean isPowered(){
+    public boolean isPowered() {
         return sign.getBlock().isBlockPowered() || sign.getBlock().isBlockIndirectlyPowered();
     }
 
-    public Block getBackBlock(){
-        if(getSignBack() == null){
-            GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.YELLOW + "Sign is placed incorrect. Direction should be: North, East, South or West.");
+    public Block getBackBlock() {
+        if (getSignBack() == null) {
+            if (player != null) {
+                player.sendMessage(ChatColor.YELLOW + "Sign is placed incorrect. Direction should be: North, East, South or West.");
+            }
         }
         return sign.getBlock().getRelative(getSignBack());
     }
 
-    public Block getFrontBlock(){
-        if(getSignFront() == null){
-            GatesAndBridgesPlayerListener.player.sendMessage(ChatColor.YELLOW + "Sign is placed incorrect. Direction should be: North, East, South or West.");
+    public Block getFrontBlock() {
+        if (getSignFront() == null) {
+            if (player != null) {
+                player.sendMessage(ChatColor.YELLOW + "Sign is placed incorrect. Direction should be: North, East, South or West.");
+            }
         }
         return sign.getBlock().getRelative(getSignFront());
     }
 
-    public Block getBlock(){
+    public Block getBlock() {
         return sign.getBlock();
+    }
+
+    public int getBridgeWidth() throws InvalidNotationException {
+        int width = 0;
+        if (getMechanicsType() == MechanicsType.BRIDGE) {
+            String material = "";
+            if (sign.getLine(2).contains("[Width ")) {
+                String str = sign.getLine(2).substring(7, sign.getLine(3).length() - 1);
+                width = Integer.getInteger(str);
+                if (width > 0 && width < config.getInt("bridge.max-width", config.getInt("bridge.default-width", 3))) {
+                    return width;
+                } else {
+                    throw new InvalidNotationException("Width greater than max or 0!");
+                }
+            } else if (sign.getLine(3).contains("[Width ")) {
+                String str = sign.getLine(3).substring(7, sign.getLine(3).length() - 1);
+                width = Integer.getInteger(str);
+                if (width > 0 && width < config.getInt("bridge.max-width", config.getInt("bridge.default-width", 3))) {
+                    return width;
+                } else {
+                    throw new InvalidNotationException("Width greater than max or 0!");
+                }
+            } else {
+                return config.getInt("bridge.default-width", 3);
+            }
+        }
+        return -1;
     }
 }
