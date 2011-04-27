@@ -21,9 +21,9 @@ public class ChestMapper {
     public boolean mapChest(Block s) {
         startBlock = s;
         Block tempBlock;
-        for (int dy = -1; dy <= 1; dy++) {
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dz = -1; dz <= 1; dz++) {
+        for (int dy = -2; dy <= 2; dy++) {
+            for (int dx = -2; dx <= 2; dx++) {
+                for (int dz = -2; dz <= 2; dz++) {
                     if (dx == 0 && dy == 0 && dz == 0)
                         continue;
                     tempBlock = startBlock.getRelative(dx, dy, dz);

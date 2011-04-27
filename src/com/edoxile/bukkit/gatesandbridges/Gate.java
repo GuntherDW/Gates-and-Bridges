@@ -165,7 +165,7 @@ public class Gate {
     private Block getStartBlock(Block startBlock) {
         Block tempBlock;
         for (int dy = -1; dy <= 64; dy++) {
-            for (int dx = -1; dx <= 1; dx += 2) {
+            for (int dx = -1; dx <= 1; dx++) {
                 tempBlock = startBlock.getRelative(dx, dy, 0);
                 if (tempBlock.getType() == Material.FENCE)
                     return getTopFence(tempBlock);
@@ -180,7 +180,6 @@ public class Gate {
     }
 
     private Block getTopFence(Block startBlock) {
-        int dy = 1;
         Block tempBlock = startBlock;
         while (tempBlock.getRelative(BlockFace.UP).getType() == Material.FENCE) {
             tempBlock = tempBlock.getRelative(BlockFace.UP);
@@ -191,25 +190,29 @@ public class Gate {
     private void listFences(Block s) throws InvalidSizeException {
         Block tempBlock;
         for (int dx = -1; dx <= 1; dx += 2) {
-            tempBlock = s.getRelative(dx, 0, 0);
-            if (tempBlock.getType() == Material.FENCE && (!fenceSet.contains(tempBlock))) {
-                fenceSet.add(tempBlock);
-                if ((Math.abs(tempBlock.getLocation().getBlockZ() - startBlock.getLocation().getBlockZ()) + 1) > width)
-                    width = Math.abs(tempBlock.getLocation().getBlockZ() - startBlock.getLocation().getBlockZ()) + 1;
-                if ((Math.abs(tempBlock.getLocation().getBlockX() - startBlock.getLocation().getBlockX()) + 1) > length)
-                    length = Math.abs(tempBlock.getLocation().getBlockX() - startBlock.getLocation().getBlockX()) + 1;
-                listFences(tempBlock);
+            for (int dy = 1; dy >= -1; dy--) {
+                tempBlock = s.getRelative(dx, dy, 0);
+                if (tempBlock.getType() == Material.FENCE && (!fenceSet.contains(tempBlock))) {
+                    fenceSet.add(tempBlock);
+                    if ((Math.abs(tempBlock.getLocation().getBlockZ() - startBlock.getLocation().getBlockZ()) + 1) > width)
+                        width = Math.abs(tempBlock.getLocation().getBlockZ() - startBlock.getLocation().getBlockZ()) + 1;
+                    if ((Math.abs(tempBlock.getLocation().getBlockX() - startBlock.getLocation().getBlockX()) + 1) > length)
+                        length = Math.abs(tempBlock.getLocation().getBlockX() - startBlock.getLocation().getBlockX()) + 1;
+                    listFences(tempBlock);
+                }
             }
         }
         for (int dz = -1; dz <= 1; dz += 2) {
-            tempBlock = s.getRelative(0, 0, dz);
-            if (tempBlock.getType() == Material.FENCE && (!fenceSet.contains(tempBlock))) {
-                fenceSet.add(tempBlock);
-                if ((Math.abs(tempBlock.getLocation().getBlockZ() - startBlock.getLocation().getBlockZ()) + 1) > width)
-                    width = Math.abs(tempBlock.getLocation().getBlockZ() - startBlock.getLocation().getBlockZ()) + 1;
-                if ((Math.abs(tempBlock.getLocation().getBlockX() - startBlock.getLocation().getBlockX()) + 1) > length)
-                    length = Math.abs(tempBlock.getLocation().getBlockX() - startBlock.getLocation().getBlockX()) + 1;
-                listFences(tempBlock);
+            for (int dy = 1; dy >= -1; dy--) {
+                tempBlock = s.getRelative(0, dy, dz);
+                if (tempBlock.getType() == Material.FENCE && (!fenceSet.contains(tempBlock))) {
+                    fenceSet.add(tempBlock);
+                    if ((Math.abs(tempBlock.getLocation().getBlockZ() - startBlock.getLocation().getBlockZ()) + 1) > width)
+                        width = Math.abs(tempBlock.getLocation().getBlockZ() - startBlock.getLocation().getBlockZ()) + 1;
+                    if ((Math.abs(tempBlock.getLocation().getBlockX() - startBlock.getLocation().getBlockX()) + 1) > length)
+                        length = Math.abs(tempBlock.getLocation().getBlockX() - startBlock.getLocation().getBlockX()) + 1;
+                    listFences(tempBlock);
+                }
             }
         }
     }
