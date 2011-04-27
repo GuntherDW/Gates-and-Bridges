@@ -13,7 +13,6 @@ import org.bukkit.material.MaterialData;
 import org.bukkit.util.config.Configuration;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.logging.Logger;
 
 public class Bridge {
@@ -106,8 +105,12 @@ public class Bridge {
                 for (int dz = 1; dz < e.getLocation().getBlockZ() - s.getLocation().getBlockZ(); dz++) {
                     for (int dx = -1; dx <= 1; dx++) {
                         tempBlock = s.getRelative(dx, dy, dz);
-                        if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType() && tempBlock.getData() == bridgeMaterial.getData().getData()))
-                            bridgeSet.add(tempBlock);
+                        if(bridgeMaterial.getData() != null)
+                            if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType() && tempBlock.getData() == bridgeMaterial.getData().getData()))
+                                bridgeSet.add(tempBlock);
+                        else
+                            if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType()))
+                                bridgeSet.add(tempBlock);
                     }
                 }
             }
@@ -116,8 +119,12 @@ public class Bridge {
                 for (int dz = -1; dz > e.getLocation().getBlockZ() - s.getLocation().getBlockZ(); dz--) {
                     for (int dx = -1; dx <= 1; dx++) {
                         tempBlock = s.getRelative(dx, dy, dz);
-                        if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType() && tempBlock.getData() == bridgeMaterial.getData().getData()))
-                            bridgeSet.add(tempBlock);
+                        if(bridgeMaterial.getData() != null)
+                            if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType() && tempBlock.getData() == bridgeMaterial.getData().getData()))
+                                bridgeSet.add(tempBlock);
+                        else
+                            if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType()))
+                                bridgeSet.add(tempBlock);
                     }
                 }
             }
@@ -126,8 +133,12 @@ public class Bridge {
                 for (int dx = -1; dx > e.getLocation().getBlockX() - s.getLocation().getBlockX(); dx--) {
                     for (int dz = -1; dz <= 1; dz++) {
                         tempBlock = s.getRelative(dx, dy, dz);
-                        if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType() && tempBlock.getData() == bridgeMaterial.getData().getData()))
-                            bridgeSet.add(tempBlock);
+                        if(bridgeMaterial.getData() != null)
+                            if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType() && tempBlock.getData() == bridgeMaterial.getData().getData()))
+                                bridgeSet.add(tempBlock);
+                        else
+                            if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType()))
+                                bridgeSet.add(tempBlock);
                     }
                 }
             }
@@ -136,8 +147,12 @@ public class Bridge {
                 for (int dx = 1; dx < e.getLocation().getBlockX() - s.getLocation().getBlockX(); dx++) {
                     for (int dz = -1; dz <= 1; dz++) {
                         tempBlock = s.getRelative(dx, dy, dz);
-                        if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType() && tempBlock.getData() == bridgeMaterial.getData().getData()))
-                            bridgeSet.add(tempBlock);
+                        if(bridgeMaterial.getData() != null)
+                            if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType() && tempBlock.getData() == bridgeMaterial.getData().getData()))
+                                bridgeSet.add(tempBlock);
+                        else
+                            if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType()))
+                                bridgeSet.add(tempBlock);
                     }
                 }
             }
@@ -215,7 +230,9 @@ public class Bridge {
         for (Block b : bridgeSet) {
             Block tempBlock = b;
                 tempBlock.setType(bridgeMaterial.getType());
-                tempBlock.setData(bridgeMaterial.getData().getData());
+                if(bridgeMaterial.getData()!=null){
+                    tempBlock.setData(bridgeMaterial.getData().getData());
+                }
             blocks++;
         }
         try {

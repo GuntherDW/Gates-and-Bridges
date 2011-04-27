@@ -9,7 +9,7 @@ import org.bukkit.util.config.Configuration;
 import java.util.logging.Logger;
 
 /**
- * TODO Check if other materials work (including steps) in bridges
+ * TODO fix empty blockset in north/south direction
  */
 public class GatesAndBridges extends JavaPlugin {
     private final static Logger log = Logger.getLogger("Minecraft");
