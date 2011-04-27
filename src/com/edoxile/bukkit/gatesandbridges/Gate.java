@@ -71,12 +71,15 @@ public class Gate {
         }
         try {
             chestMapper.addMaterial(Material.FENCE, fences);
+            if (player != null) {
+                player.sendMessage(ChatColor.YELLOW + "Gate opened!");
+            }
             return true;
         } catch (InsufficientSpaceException ex) {
             if (player != null) {
-                player.sendMessage(ChatColor.RED + "Not enough space in chest! Items lost!");
+                player.sendMessage(ChatColor.RED + "Not enough space in chest! Items might be lost!");
             }
-            log.info("[Gates and Bridges] Not enough space in chest. Gate position: {x=" + Integer.toString(sign.getBlock().getLocation().getBlockX()) + "; z=" + Integer.toString(sign.getBlock().getLocation().getBlockZ()));
+            log.info("[Gates and Bridges] Not enough space in chest. Gate position: {x=" + Integer.toString(sign.getBlock().getLocation().getBlockX()) + "; z=" + Integer.toString(sign.getBlock().getLocation().getBlockZ()) + "}");
             for (Block b : fenceSet) {
                 Block tempBlock = b;
                 while (canPassThrough(tempBlock.getRelative(BlockFace.DOWN).getType())) {
@@ -100,6 +103,9 @@ public class Gate {
         }
         try {
             chestMapper.removeMaterial(Material.FENCE, fences);
+            if (player != null) {
+                player.sendMessage(ChatColor.YELLOW + "Gate closed!");
+            }
             return true;
         } catch (InsufficientMaterialsException ex) {
             if (player != null) {
@@ -209,10 +215,9 @@ public class Gate {
     }
 
     private void checkGateSize() throws InvalidSizeException {
-        log.info("Gate width: " + Integer.toString(width) + ", length: " + Integer.toString(length));
         if (width > length) {
             if (width > config.getInt("gate.max-length", 30) || length > config.getInt("gate.max-width", 3)) {
-                log.info("Gate to large, width: " + Integer.toString(width) + ", length: " + Integer.toString(length));
+                log.info("[Gates and Bridges] Gate to large, width: " + Integer.toString(width) + ", length: " + Integer.toString(length));
                 fenceSet.clear();
                 throw new InvalidSizeException();
             } else {

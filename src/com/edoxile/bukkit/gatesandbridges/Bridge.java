@@ -27,6 +27,9 @@ public class Bridge {
     private Block endBlock = null;
     private HashSet<Block> bridgeSet = new HashSet<Block>();
 
+    private int leftSize;
+    private int rightSize;
+
     public boolean mapBridge(Block block, BlockFace blockFace) {
         startBlock = block;
         try {
@@ -50,7 +53,7 @@ public class Bridge {
             return false;
         } catch (InvalidNotationException ex) {
             if (player != null) {
-                player.sendMessage(ChatColor.RED + "There is a typo on your sign!");
+                player.sendMessage(ChatColor.RED + "There is a typo on your sign!: " + ex.getMessage());
             }
             return false;
         }
@@ -78,9 +81,6 @@ public class Bridge {
         throw new InvalidSizeException();
     }
 
-    /**
-     * TODO Check for [Width x], set width;
-     */
     private void listBlocks(Block s, Block e, BlockFace d) throws InvalidNotationException, InvalidBridgeMaterialException, AsymmetricalBridgeException {
         bridgeSet.clear();
         Block tempBlock;
@@ -91,19 +91,29 @@ public class Bridge {
             }
             dy = 1;
             bridgeMaterial = new MaterialData(s.getRelative(BlockFace.UP).getType(), s.getRelative(BlockFace.UP).getData()).toItemStack();
-        } else if (allowedBridgeMaterial(s.getRelative(BlockFace.DOWN).getType())) {
+        }
+        if (allowedBridgeMaterial(s.getRelative(BlockFace.DOWN).getType()) && dy == 0) {
             if (s.getRelative(BlockFace.UP).getType() != e.getRelative(BlockFace.UP).getType()) {
                 throw new AsymmetricalBridgeException();
             }
             dy = -1;
             bridgeMaterial = new MaterialData(s.getRelative(BlockFace.UP).getType(), s.getRelative(BlockFace.UP).getData()).toItemStack();
-        } else {
+        } else if (dy == 0) {
             throw new InvalidBridgeMaterialException();
         }
+
+        int width = sign.getBridgeWidth();
+        if ((width % 2) == 1) {
+            leftSize = rightSize = ((width - 1) / 2);
+        } else {
+            leftSize = (width / 2);
+            rightSize = leftSize - 1;
+        }
+
         switch (d) {
             case WEST: {
                 for (int dz = 1; dz < e.getLocation().getBlockZ() - s.getLocation().getBlockZ(); dz++) {
-                    for (int dx = -1; dx <= 1; dx++) {
+                    for (int dx = -leftSize; dx <= rightSize; dx++) {
                         tempBlock = s.getRelative(dx, dy, dz);
                         if (bridgeMaterial.getData() != null) {
                             if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType() && tempBlock.getData() == bridgeMaterial.getData().getData())) {
@@ -120,7 +130,7 @@ public class Bridge {
             break;
             case EAST: {
                 for (int dz = -1; dz > e.getLocation().getBlockZ() - s.getLocation().getBlockZ(); dz--) {
-                    for (int dx = -1; dx <= 1; dx++) {
+                    for (int dx = -leftSize; dx <= rightSize; dx++) {
                         tempBlock = s.getRelative(dx, dy, dz);
                         if (bridgeMaterial.getData() != null) {
                             if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType() && tempBlock.getData() == bridgeMaterial.getData().getData())) {
@@ -137,7 +147,7 @@ public class Bridge {
             break;
             case NORTH: {
                 for (int dx = -1; dx > e.getLocation().getBlockX() - s.getLocation().getBlockX(); dx--) {
-                    for (int dz = -1; dz <= 1; dz++) {
+                    for (int dz = -leftSize; dz <= rightSize; dz++) {
                         tempBlock = s.getRelative(dx, dy, dz);
                         if (bridgeMaterial.getData() != null) {
                             if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType() && tempBlock.getData() == bridgeMaterial.getData().getData())) {
@@ -154,7 +164,7 @@ public class Bridge {
             break;
             case SOUTH: {
                 for (int dx = 1; dx < e.getLocation().getBlockX() - s.getLocation().getBlockX(); dx++) {
-                    for (int dz = -1; dz <= 1; dz++) {
+                    for (int dz = -leftSize; dz <= rightSize; dz++) {
                         tempBlock = s.getRelative(dx, dy, dz);
                         if (bridgeMaterial.getData() != null) {
                             if (canPassThrough(tempBlock.getType()) || (tempBlock.getType() == bridgeMaterial.getType() && tempBlock.getData() == bridgeMaterial.getData().getData())) {
@@ -170,7 +180,7 @@ public class Bridge {
             }
             break;
             default:
-                log.info("[BridgesAndGates] Not a valid BlockFace: " + d.name());
+                log.info("[Gates and Bridges] Not a valid BlockFace: " + d.name());
                 break;
         }
     }
@@ -222,12 +232,15 @@ public class Bridge {
         try {
             bridgeMaterial.setAmount(blocks);
             chestMapper.addMaterial(bridgeMaterial);
+            if (player != null) {
+                player.sendMessage(ChatColor.YELLOW + "Bridge opened!");
+            }
             return true;
         } catch (InsufficientSpaceException ex) {
             if (player != null) {
-                player.sendMessage(ChatColor.RED + "Not enough space in chest! Items lost!");
+                player.sendMessage(ChatColor.RED + "Not enough space in chest! Items might be lost!");
             }
-            log.info("[Gates and Bridges] Not enough space in chest. Bridge position: {x=" + Integer.toString(sign.getBlock().getLocation().getBlockX()) + "; z=" + Integer.toString(sign.getBlock().getLocation().getBlockZ()));
+            log.info("[Gates and Bridges] Not enough space in chest. Bridge position: {x=" + Integer.toString(sign.getBlock().getLocation().getBlockX()) + "; z=" + Integer.toString(sign.getBlock().getLocation().getBlockZ()) + "}");
             for (Block b : bridgeSet) {
                 Block tempBlock = b;
                 tempBlock.setType(bridgeMaterial.getType());
@@ -250,6 +263,9 @@ public class Bridge {
         try {
             bridgeMaterial.setAmount(blocks);
             chestMapper.removeMaterial(bridgeMaterial);
+            if (player != null) {
+                player.sendMessage(ChatColor.YELLOW + "Bridge closed!");
+            }
             return true;
         } catch (InsufficientMaterialsException ex) {
             if (player != null) {
@@ -267,7 +283,7 @@ public class Bridge {
         for (Block b : bridgeSet) {
             return b.getType() == bridgeMaterial.getType();
         }
-        log.info("[GatesAndBridges] blockSet empty!");
+        log.info("[Gates and Bridges] blockSet empty!");
         return false;
     }
 

@@ -16,7 +16,7 @@ public class GatesAndBridgesPlayerListener extends PlayerListener {
 
     private Configuration config = null;
 
-    public GatesAndBridgesPlayerListener(Configuration c){
+    public GatesAndBridgesPlayerListener(Configuration c) {
         config = c;
     }
 

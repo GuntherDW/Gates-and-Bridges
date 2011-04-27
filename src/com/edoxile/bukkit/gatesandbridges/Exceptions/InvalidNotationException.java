@@ -5,7 +5,7 @@ package com.edoxile.bukkit.gatesandbridges.Exceptions;
  * User: Edoxile
  */
 public class InvalidNotationException extends Exception {
-    public InvalidNotationException(String msg){
+    public InvalidNotationException(String msg) {
         super(msg);
     }
 }

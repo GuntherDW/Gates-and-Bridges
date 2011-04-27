@@ -8,9 +8,6 @@ import org.bukkit.util.config.Configuration;
 
 import java.util.logging.Logger;
 
-/**
- * TODO fix empty blockset in north/south direction
- */
 public class GatesAndBridges extends JavaPlugin {
     private final static Logger log = Logger.getLogger("Minecraft");
     private Configuration config = null;
@@ -47,7 +44,7 @@ public class GatesAndBridges extends JavaPlugin {
                 getConfiguration().setProperty("gate.max-width", 3);
                 return false;
             } catch (Throwable e) {
-                log.severe("[Gates and Bridges] There was an exception while we were saving the config, be sure to doublecheck!");
+                log.severe("[Gates and Bridges] There was an exception while we were saving the config, be sure to double-check!");
                 return false;
             }
         } else {

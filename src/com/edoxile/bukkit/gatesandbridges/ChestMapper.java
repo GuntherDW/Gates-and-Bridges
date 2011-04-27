@@ -42,14 +42,6 @@ public class ChestMapper {
         return false;
     }
 
-    public boolean containsMaterial(Material m, int a) {
-        return chest.getInventory().contains(m, a);
-    }
-
-    public boolean containsMaterial(Material m) {
-        return chest.getInventory().contains(m);
-    }
-
     public boolean removeMaterial(ItemStack itemStack) throws InsufficientMaterialsException {
         if (safeRemoveItems(itemStack)) {
             return true;
@@ -80,7 +72,7 @@ public class ChestMapper {
         ItemStack itemStack = new ItemStack(m, a);
         HashMap<Integer, ItemStack> hashMap = chest.getInventory().addItem(itemStack);
         if (!hashMap.isEmpty()) {
-            log.info("[GatesAndBridges] Couldn't fit all items in chest.");
+            log.info("[Gates and Bridges] Couldn't fit all items in chest.");
             throw new InsufficientSpaceException();
         } else {
             return true;
@@ -90,7 +82,7 @@ public class ChestMapper {
     public boolean addMaterial(ItemStack itemStack) throws InsufficientSpaceException {
         HashMap<Integer, ItemStack> hashMap = chest.getInventory().addItem(itemStack);
         if (!hashMap.isEmpty()) {
-            log.info("[GatesAndBridges] Couldn't fit all items in chest.");
+            log.info("[Gates and Bridges] Couldn't fit all items in chest.");
             throw new InsufficientSpaceException();
         } else {
             return true;

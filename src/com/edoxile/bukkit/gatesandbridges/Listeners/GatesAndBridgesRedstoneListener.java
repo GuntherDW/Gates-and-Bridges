@@ -18,7 +18,7 @@ public class GatesAndBridgesRedstoneListener extends BlockListener {
     private final static Logger log = Logger.getLogger("Minecraft");
     private Configuration config = null;
 
-    public GatesAndBridgesRedstoneListener(Configuration c){
+    public GatesAndBridgesRedstoneListener(Configuration c) {
         config = c;
     }
 
@@ -43,7 +43,7 @@ public class GatesAndBridgesRedstoneListener extends BlockListener {
                                         return;
                                     if (event.getNewCurrent() == 0 && gate.isClosed()) {
                                         gate.openGate();
-                                    } else if (!gate.isClosed() && event.getNewCurrent() > 0 ) {
+                                    } else if (!gate.isClosed() && event.getNewCurrent() > 0) {
                                         gate.closeGate();
                                     } else {
                                         return;
