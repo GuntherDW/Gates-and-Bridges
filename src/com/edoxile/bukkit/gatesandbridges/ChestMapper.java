@@ -7,8 +7,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
-import org.omg.CORBA.INTERNAL;
 
 import java.util.Arrays;
 import java.util.HashMap;
