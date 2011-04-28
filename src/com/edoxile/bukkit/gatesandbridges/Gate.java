@@ -109,7 +109,7 @@ public class Gate {
             return true;
         } catch (InsufficientMaterialsException ex) {
             if (player != null) {
-                player.sendMessage(ChatColor.RED + "Not enough materials in chest! Gate not closed!");
+                player.sendMessage(ChatColor.RED + "Not enough materials in chest! Still need: " + ex.toString() + " fence!");
             }
             for (Block b : fenceSet) {
                 Block tempBlock = b;

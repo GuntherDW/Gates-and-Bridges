@@ -269,7 +269,7 @@ public class Bridge {
             return true;
         } catch (InsufficientMaterialsException ex) {
             if (player != null) {
-                player.sendMessage(ChatColor.RED + "Not enough materials in chest! Bridge not closed!");
+                player.sendMessage(ChatColor.RED + "Not enough materials in chest! Still need: " + ex.toString() + " " + bridgeMaterial.getType().name().toLowerCase() + "!");
             }
             for (Block b : bridgeSet) {
                 Block tempBlock = b;

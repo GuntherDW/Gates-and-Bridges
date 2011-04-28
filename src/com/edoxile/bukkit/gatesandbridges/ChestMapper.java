@@ -43,10 +43,11 @@ public class ChestMapper {
     }
 
     public boolean removeMaterial(ItemStack itemStack) throws InsufficientMaterialsException {
-        if (safeRemoveItems(itemStack)) {
+        int leftOver = safeRemoveItems(itemStack);
+        if (leftOver == 0) {
             return true;
         } else {
-            throw new InsufficientMaterialsException();
+            throw new InsufficientMaterialsException(leftOver);
         }
     }
 
@@ -62,7 +63,7 @@ public class ChestMapper {
                 itemStack.setAmount(a - amount);
                 hashMap = chest.getInventory().addItem(itemStack);
             }
-            throw new InsufficientMaterialsException();
+            throw new InsufficientMaterialsException(amount);
         } else {
             return true;
         }
@@ -89,7 +90,7 @@ public class ChestMapper {
         }
     }
 
-    private boolean safeRemoveItems(ItemStack itemStack) {
+    private int safeRemoveItems(ItemStack itemStack) {
         if (itemStack.getData() != null) {
             List<ItemStack> stacks = Arrays.asList(chest.getInventory().getContents());
             ItemStack tempStack;
@@ -115,10 +116,10 @@ public class ChestMapper {
                 }
             }
             if (itemStack.getAmount() > 0) {
-                return false;
+                return itemStack.getAmount();
             } else {
                 chest.getInventory().setContents((ItemStack[]) stacks.toArray());
-                return true;
+                return 0;
             }
         } else {
             int a = itemStack.getAmount();
@@ -132,9 +133,9 @@ public class ChestMapper {
                     itemStack.setAmount(a - amount);
                     hashMap = chest.getInventory().addItem(itemStack);
                 }
-                return false;
+                return amount;
             } else {
-                return true;
+                return 0;
             }
         }
     }
