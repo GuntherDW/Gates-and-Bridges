@@ -8,5 +8,5 @@ package com.edoxile.bukkit.gatesandbridges;
  * To change this template use File | Settings | File Templates.
  */
 public enum MechanicsType {
-    BRIDGE, GATE, DGATE
+    BRIDGE, GATE, DGATE;
 }

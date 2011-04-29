@@ -179,7 +179,7 @@ public class Gate {
                 if (tempBlock.getType() == Material.FENCE)
                     return getTopFence(tempBlock);
             }
-            for (int dz = nsw; dz <= sw; dz += 2) {
+            for (int dz = nsw; dz <= sw; dz++) {
                 tempBlock = startBlock.getRelative(0, dy, dz);
                 if (tempBlock.getType() == Material.FENCE)
                     return getTopFence(tempBlock);

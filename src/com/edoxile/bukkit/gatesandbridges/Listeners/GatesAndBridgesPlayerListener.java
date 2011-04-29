@@ -1,9 +1,7 @@
 package com.edoxile.bukkit.gatesandbridges.Listeners;
 
-import com.edoxile.bukkit.gatesandbridges.Bridge;
-import com.edoxile.bukkit.gatesandbridges.Gate;
-import com.edoxile.bukkit.gatesandbridges.GatesAndBridgesSign;
-import com.edoxile.bukkit.gatesandbridges.MechanicsType;
+import com.edoxile.bukkit.gatesandbridges.*;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -15,10 +13,12 @@ import org.bukkit.event.player.PlayerListener;
 import org.bukkit.util.config.Configuration;
 
 public class GatesAndBridgesPlayerListener extends PlayerListener {
+    private GatesAndBridges plugin;
     private Configuration config = null;
 
-    public GatesAndBridgesPlayerListener(Configuration c) {
+    public GatesAndBridgesPlayerListener(Configuration c, GatesAndBridges instance) {
         config = c;
+        plugin = instance;
     }
 
     public void onPlayerInteract(PlayerInteractEvent event) {
@@ -36,12 +36,20 @@ public class GatesAndBridgesPlayerListener extends PlayerListener {
                     GatesAndBridgesSign sign = new GatesAndBridgesSign(s, event.getPlayer(), config);
                     if (sign.getMechanicsType() == MechanicsType.GATE ||
                             sign.getMechanicsType() == MechanicsType.DGATE) {
+                        if(!plugin.check(event.getPlayer(), "gate.toggle", event.getClickedBlock())) {
+                            event.getPlayer().sendMessage(ChatColor.RED+"You do not have permission to toggle gates!");
+                            return;
+                        }
                         Gate gate = sign.gateFactory();
                         if (!gate.isValidGate()) {
                             return;
                         }
                         gate.toggleGate();
                     } else if (sign.getMechanicsType() == MechanicsType.BRIDGE) {
+                        if(!plugin.check(event.getPlayer(), "bridge.toggle", event.getClickedBlock())) {
+                            event.getPlayer().sendMessage(ChatColor.RED+"You do not have permission to toggle bridges!");
+                            return;
+                        }
                         Bridge bridge = sign.bridgeFactory();
                         if (!bridge.isValidBridge()) {
                             return;

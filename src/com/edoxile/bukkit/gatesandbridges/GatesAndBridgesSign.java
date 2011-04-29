@@ -8,6 +8,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.util.config.Configuration;
+import sun.plugin.navig.motif.Plugin;
 
 public class GatesAndBridgesSign {
     private Sign sign = null;
@@ -21,16 +22,7 @@ public class GatesAndBridgesSign {
     }
 
     public MechanicsType getMechanicsType() {
-        String line = sign.getLine(1);
-        if (line.equals("[Gate]")) {
-            return MechanicsType.GATE;
-        } else if(line.equals("[DGate]")) {
-            return MechanicsType.DGATE;
-        } else if (line.equals("[Bridge]")) {
-            return MechanicsType.BRIDGE;
-        } else {
-            return null;
-        }
+        return GatesAndBridges.getMechanicsType(sign.getLine(1));
     }
 
     public Gate gateFactory() {
