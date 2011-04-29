@@ -33,9 +33,10 @@ public class GatesAndBridgesRedstoneListener extends BlockListener {
                         BlockState state = tempBlock.getState();
                         if (state instanceof Sign) {
                             Sign s = (Sign) state;
-                            if (s.getLine(1).equals("[Bridge]") || s.getLine(1).equals("[Gate]")) {
+                            if (s.getLine(1).equals("[Bridge]") || s.getLine(1).equals("[Gate]") || s.getLine(1).equals("[DGate]")) {
                                 GatesAndBridgesSign sign = new GatesAndBridgesSign(s, null, config);
-                                if (sign.getMechanicsType() == MechanicsType.GATE) {
+                                if (sign.getMechanicsType() == MechanicsType.GATE||
+                                    sign.getMechanicsType() == MechanicsType.DGATE) {
                                     if (event.getNewCurrent() == event.getOldCurrent())
                                         return;
                                     Gate gate = sign.gateFactory();

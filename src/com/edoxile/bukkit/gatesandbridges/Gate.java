@@ -23,11 +23,13 @@ public class Gate {
     private Configuration config = null;
     private static int width = 0;
     private static int length = 0;
+    private boolean smallgate = false;
 
-    public Gate(GatesAndBridgesSign s, Player p, Configuration c) {
+    public Gate(GatesAndBridgesSign s, Player p, Configuration c, boolean directional) {
         sign = s;
         player = p;
         config = c;
+        smallgate = directional;
     }
 
     public boolean isValidGate() {
@@ -44,6 +46,9 @@ public class Gate {
                     return false;
                 }
             } else {
+                if(player != null) {
+                    player.sendMessage(ChatColor.GOLD + "No gate found near sign!");
+                }
                 return false;
             }
         }
@@ -164,13 +169,17 @@ public class Gate {
 
     private Block getStartBlock(Block startBlock) {
         Block tempBlock;
-        for (int dy = -1; dy <= 64; dy++) {
-            for (int dx = -1; dx <= 1; dx++) {
+
+        int sw = (smallgate?1:3); // Search Width
+        int nsw = ~sw+1; // Negative search Width
+
+        for (int dy = nsw; dy <= 64; dy++) {
+            for (int dx = nsw; dx <= sw; dx++) {
                 tempBlock = startBlock.getRelative(dx, dy, 0);
                 if (tempBlock.getType() == Material.FENCE)
                     return getTopFence(tempBlock);
             }
-            for (int dz = -1; dz <= 1; dz += 2) {
+            for (int dz = nsw; dz <= sw; dz += 2) {
                 tempBlock = startBlock.getRelative(0, dy, dz);
                 if (tempBlock.getType() == Material.FENCE)
                     return getTopFence(tempBlock);

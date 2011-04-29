@@ -24,6 +24,8 @@ public class GatesAndBridgesSign {
         String line = sign.getLine(1);
         if (line.equals("[Gate]")) {
             return MechanicsType.GATE;
+        } else if(line.equals("[DGate]")) {
+            return MechanicsType.DGATE;
         } else if (line.equals("[Bridge]")) {
             return MechanicsType.BRIDGE;
         } else {
@@ -33,7 +35,9 @@ public class GatesAndBridgesSign {
 
     public Gate gateFactory() {
         if (getMechanicsType() == MechanicsType.GATE)
-            return new Gate(this, player, config);
+            return new Gate(this, player, config, false);
+        else if(getMechanicsType() == MechanicsType.DGATE)
+            return new Gate(this, player, config, true);
         else
             return null;
     }

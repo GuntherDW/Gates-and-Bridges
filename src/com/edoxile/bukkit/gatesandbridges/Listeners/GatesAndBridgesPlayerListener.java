@@ -34,7 +34,8 @@ public class GatesAndBridgesPlayerListener extends PlayerListener {
                         return;
                     }
                     GatesAndBridgesSign sign = new GatesAndBridgesSign(s, event.getPlayer(), config);
-                    if (sign.getMechanicsType() == MechanicsType.GATE) {
+                    if (sign.getMechanicsType() == MechanicsType.GATE ||
+                            sign.getMechanicsType() == MechanicsType.DGATE) {
                         Gate gate = sign.gateFactory();
                         if (!gate.isValidGate()) {
                             return;
