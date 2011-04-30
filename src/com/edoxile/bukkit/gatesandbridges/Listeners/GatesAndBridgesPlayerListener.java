@@ -21,6 +21,40 @@ public class GatesAndBridgesPlayerListener extends PlayerListener {
         plugin = instance;
     }
 
+    public Sign getHiddenSwitch(Block blockClicked) {
+
+        String[] facetry = new String[] {"NORTH", "EAST", "SOUTH", "WEST", "UP", "DOWN"};
+        BlockFace face;
+        for(String f : facetry) {
+            face = BlockFace.valueOf(f);
+            if(blockClicked.getRelative(face).getState() instanceof Sign) {
+                if(((Sign)blockClicked.getRelative(face).getState()).getLine(1).equalsIgnoreCase("[x]")) {
+                    return (Sign)blockClicked.getRelative(face).getState();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns true if a block uses redstone in some way.
+     * Shamelessly stolen from sk89q's craftbook
+     *
+     * @param id
+     * @return
+     */
+    public static boolean isRedstoneBlock(int id) {
+        return id == Material.LEVER.getId()
+                || id == Material.STONE_PLATE.getId()
+                || id == Material.WOOD_PLATE.getId()
+                || id == Material.REDSTONE_TORCH_ON.getId()
+                || id == Material.REDSTONE_TORCH_OFF.getId()
+                || id == Material.STONE_BUTTON.getId()
+                || id == Material.REDSTONE_WIRE.getId()
+                || id == Material.WOODEN_DOOR.getId()
+                || id == Material.IRON_DOOR.getId();
+    }
+
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             switch (event.getClickedBlock().getType()) {
@@ -62,28 +96,13 @@ public class GatesAndBridgesPlayerListener extends PlayerListener {
                 break;
                 default: {
                     Block tempBlock = event.getClickedBlock();
-                    BlockFace blockFace = null;
-                    switch (event.getBlockFace()) {
-                        case WEST:
-                            blockFace = BlockFace.EAST;
-                            break;
-                        case EAST:
-                            blockFace = BlockFace.WEST;
-                            break;
-                        case NORTH:
-                            blockFace = BlockFace.SOUTH;
-                            break;
-                        case SOUTH:
-                            blockFace = BlockFace.NORTH;
-                            break;
-                    }
-                    if (blockFace == null)
-                        return;
-                    if (tempBlock.getRelative(blockFace).getType() == Material.SIGN_POST || tempBlock.getRelative(blockFace).getType() == Material.WALL_SIGN) {
-                        BlockState state = tempBlock.getRelative(blockFace).getState();
-                        if (state instanceof Sign) {
-                            Sign sign = (Sign) state;
-                            if (sign.getLine(1).equalsIgnoreCase("[X]")) {
+                    if(tempBlock.getType() != Material.SIGN_POST
+                       && tempBlock.getType() != Material.WALL_SIGN
+                       && !isRedstoneBlock(tempBlock.getTypeId())) {
+
+                        Sign sign = getHiddenSwitch(tempBlock);
+                        if(sign!=null) {
+                            if (sign.getLine(1).equalsIgnoreCase("[x]")) {
                                 for (int dx = -1; dx <= 1; dx++) {
                                     for (int dy = -1; dy <= 1; dy++) {
                                         for (int dz = -1; dz <= 1; dz++) {

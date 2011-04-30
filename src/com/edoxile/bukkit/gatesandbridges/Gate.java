@@ -170,7 +170,7 @@ public class Gate {
     private Block getStartBlock(Block startBlock) {
         Block tempBlock;
 
-        int sw = (smallgate?1:3); // Search Width
+        int sw = (smallgate?1:(3+1)); // Search Width
         int nsw = ~sw+1; // Negative search Width
 
         for (int dy = nsw; dy <= 64; dy++) {
